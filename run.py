@@ -7,26 +7,18 @@ import re
 import json
 import requests
 from youtube_search import YoutubeSearch
+from pathlib import Path
 
 def write_to_file(jsondata):
     with open("temptest.json", "w") as twitter_data_file:
         json.dump(jsondata, twitter_data_file, indent=4, sort_keys=True)
-"""
-playlist = Playlist("https://www.youtube.com/playlist?list=PLmWRgWFuj2LSDuV_T8ZaE9kCq1L8oL0ni")
 
-for url in playlist:
-    print(YouTube(url))
-    a = YouTube(url).streams.get_highest_resolution().download('downloads')
-    videoclip = VideoFileClip(a)
-    audioclip = videoclip.audio
-    audioclip.write_audiofile('test.mp3')
-"""
 
 def get_tracks(playlist_id, offset, limit):
     url = "https://api.spotify.com/v1/playlists/" + str(playlist_id) + "/tracks?offset=" + str(offset) + "&limit=" + str(limit) + "&market=GB"
     payload={}
     headers = {
-      'authorization': 'Bearer BQCxnA9qJUeb2x2ppN2ABygbuL6UOnMTOIhehxkhvCtHXBye637BpUDZF88PeOzPrp2aU5p8uywLFur6qA4',
+      'authorization': 'Bearer BQCi9cOTtqH5BumgpPz7T2zMUjlF8JboKYhP9RDionirDHrfIgcn4qhgehVHSbliX96BSdk2NxkFgvnsi8g',
       'Sec-Fetch-Dest': 'empty',
     }
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -38,6 +30,9 @@ def get_song_names(playlist_id):
     tracks = []
     while not done:
         data = get_tracks(playlist_id, offset_counter, 100)
+        if(not 'total' in data):
+            print(data)
+            exit()
         if(data['total'] > 0):
             limit = data['limit']
             offset = data['offset']
@@ -58,24 +53,35 @@ def get_song_names(playlist_id):
             done = True
     return tracks
 
-songs = get_song_names('7rutb883T7WE7k6qZ1LjwU')
 
-for song in songs:
-    song_name = song['name']
-    artist = song['artist']
-    search_query = song_name + ' ' + artist
-    results = YoutubeSearch(search_query, max_results=1).to_json()
-    result = json.loads(results)['videos'][0]
+def download_playlist(spotify_playlist_id):
+    songs = get_song_names(spotify_playlist_id)
 
-    print(result)
+    Path('downloads/' + str(spotify_playlist_id)).mkdir(parents=True, exist_ok=True)
+    
+    for song in songs:
+        song_name = song['name']
+        artist = song['artist']
+        search_query = song_name + ' ' + artist
+        results = YoutubeSearch(search_query, max_results=1).to_json()
+        result = json.loads(results)['videos'][0]
+        ytid = result['id']
+        title = result['title']
+        count = result['views']
+        print('\n\n===\nDownloading...')
+        url = "https://www.youtube.com/watch?v=" + ytid
+        print(url)
 
-    ytid = result['id']
-    title = result['title']
-    count = result['views']
+        yt = YouTube(url)
+        video = yt.streams.get_highest_resolution()
+        out_file = video.download(output_path='temp')
 
-    print('\n\n===\nDownloading...')
-    url = "https://www.youtube.com/watch?v=" + ytid
-    print(url)
-    print('===')
+        clip = mp.VideoFileClip(out_file)
+        clip.audio.write_audiofile('downloads/' + str(spotify_playlist_id) +'/'+search_query + '.mp3')
+
+        print('===')
+
+    
+download_playlist('7rutb883T7WE7k6qZ1LjwU')
     
 
