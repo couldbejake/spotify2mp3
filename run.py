@@ -10,6 +10,10 @@ from youtube_search import YoutubeSearch
 from pathlib import Path
 import os
 
+
+global BEARER_TOKEN
+BEARER_TOKEN = ""
+
 def write_to_file(jsondata):
     with open("temptest.json", "w") as twitter_data_file:
         json.dump(jsondata, twitter_data_file, indent=4, sort_keys=True)
@@ -22,7 +26,7 @@ def get_new_token():
 
     #return 'BQDJk9Gr9vlAu7bBlSDA5STkw7nQ-ounNoxZpy8bZhWYfI1f4rwyyiW3qqo3d6LQ2CgqdCkOUYNZb0jn6QQ'
 
-    return input('Enter bearer token: ')
+    return BEARER_TOKEN
 
 def get_tracks(playlist_id, offset, limit, token):
     url = "https://api.spotify.com/v1/playlists/" + str(playlist_id) + "/tracks?offset=" + str(offset) + "&limit=" + str(limit) + "&market=GB"
@@ -111,6 +115,7 @@ def download_playlist(spotify_playlist_id):
 
         print('===')
 
+BEARER_TOKEN = input('Enter Spotify Bearer Token: ')
     
 download_playlist('7rutb883T7WE7k6qZ1LjwU')
     
