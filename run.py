@@ -15,11 +15,20 @@ def write_to_file(jsondata):
         json.dump(jsondata, twitter_data_file, indent=4, sort_keys=True)
 
 
-def get_tracks(playlist_id, offset, limit):
+def get_new_token():
+    #url = ('https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M')
+    #headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+    #response = requests.get(url, headers=headers)
+
+    #return 'BQDJk9Gr9vlAu7bBlSDA5STkw7nQ-ounNoxZpy8bZhWYfI1f4rwyyiW3qqo3d6LQ2CgqdCkOUYNZb0jn6QQ'
+
+    return input('Enter bearer token: ')
+
+def get_tracks(playlist_id, offset, limit, token):
     url = "https://api.spotify.com/v1/playlists/" + str(playlist_id) + "/tracks?offset=" + str(offset) + "&limit=" + str(limit) + "&market=GB"
     payload={}
     headers = {
-      'authorization': 'Bearer BQCi9cOTtqH5BumgpPz7T2zMUjlF8JboKYhP9RDionirDHrfIgcn4qhgehVHSbliX96BSdk2NxkFgvnsi8g',
+      'authorization': 'Bearer ' + str(token),
       'Sec-Fetch-Dest': 'empty',
     }
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -30,7 +39,8 @@ def get_song_names(playlist_id):
     offset_counter = 0
     tracks = []
     while not done:
-        data = get_tracks(playlist_id, offset_counter, 100)
+        new_token = get_new_token()
+        data = get_tracks(playlist_id, offset_counter, 100, new_token)
         if(not 'total' in data):
             print(data)
             exit()
@@ -66,7 +76,7 @@ def download_playlist(spotify_playlist_id):
         search_query = song_name + ' ' + artist
         
 
-        item_loc = ('downloads/' + str(spotify_playlist_id) +'/'+search_query + '.mp3').replace('"', '').replace("'", '')
+        item_loc = 'downloads/' + str(spotify_playlist_id) +'/'+   ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
 
 
         out_file_err = ''
@@ -96,7 +106,7 @@ def download_playlist(spotify_playlist_id):
                 print('Try doing it manually!')
                 f = open('failed_log.txt', 'a')
                 f.write(search_query)
-                f.clolse()
+                f.close()
 
 
         print('===')
