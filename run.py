@@ -8,6 +8,7 @@ import json
 import requests
 from youtube_search import YoutubeSearch
 from pathlib import Path
+import os
 
 def write_to_file(jsondata):
     with open("temptest.json", "w") as twitter_data_file:
@@ -63,21 +64,40 @@ def download_playlist(spotify_playlist_id):
         song_name = song['name']
         artist = song['artist']
         search_query = song_name + ' ' + artist
-        results = YoutubeSearch(search_query, max_results=1).to_json()
-        result = json.loads(results)['videos'][0]
-        ytid = result['id']
-        title = result['title']
-        count = result['views']
-        print('\n\n===\nDownloading...')
-        url = "https://www.youtube.com/watch?v=" + ytid
-        print(url)
+        
 
-        yt = YouTube(url)
-        video = yt.streams.get_highest_resolution()
-        out_file = video.download(output_path='temp')
+        item_loc = ('downloads/' + str(spotify_playlist_id) +'/'+search_query + '.mp3').replace('"', '').replace("'", '')
 
-        clip = mp.VideoFileClip(out_file)
-        clip.audio.write_audiofile('downloads/' + str(spotify_playlist_id) +'/'+search_query + '.mp3')
+
+        out_file_err = ''
+
+        if(os.path.isfile(item_loc)):
+            print(search_query)
+            print('\nAlready exists! Skipping!\n')
+        else:
+            try:
+                results = YoutubeSearch(search_query, max_results=1).to_json()
+                result = json.loads(results)['videos'][0]
+                ytid = result['id']
+                title = result['title']
+                count = result['views']
+                print('\n\n===\nDownloading...')
+                url = "https://www.youtube.com/watch?v=" + ytid
+                print(url)
+                yt = YouTube(url)
+                video = yt.streams.get_highest_resolution()
+                out_file = video.download(output_path='temp')
+                out_file_err = out_file
+                clip = mp.VideoFileClip(out_file)
+                clip.audio.write_audiofile(item_loc)
+            except Exception as e:
+                print(e)
+                print('Failed to convert ' + str(search_query))
+                print('Try doing it manually!')
+                f = open('failed_log.txt', 'a')
+                f.write(search_query)
+                f.clolse()
+
 
         print('===')
 
