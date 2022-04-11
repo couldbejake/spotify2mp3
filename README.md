@@ -1,6 +1,8 @@
 # spotify2mp3
 Simple free and unlimited spotify playlist downloads
 
+![An image showing the Spotify To MP3 script Running](https://i.imgur.com/bxGQCt6.png)
+
 HOWTO:
 
 - Install the packages required by the application using `pip3 install {package name}`
