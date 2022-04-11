@@ -29,9 +29,14 @@ global MAX_LENGTH
 global DEBUG
 
 BEARER_TOKEN = ""
-MIN_VIEW_COUNT = 10000 #20, 000 views
-MAX_LENGTH = 60 * 10 #60 * 10
+
+### SETTINGS
+
+MIN_VIEW_COUNT = 20000 # 20, 000 views
+MAX_LENGTH = 60 * 10   # 10 minutes
 DEBUG = True
+
+##
 
 class bcolors:
     HEADER = '\033[95m'
@@ -43,7 +48,6 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
     CBLACK  = '\33[30m'
     CGREENBG  = '\33[42m'
     CREDBG    = '\33[41m'
@@ -106,8 +110,8 @@ def download_playlist(spotify_playlist_id, folder_name):
         artist = song['artist']
         song_image_url = song['song_image']
         search_query = song_name + ' ' + artist
-        print('\n\n')
-        print('\n' + bcolors.CGREENBG + bcolors.CBLACK + 'Downloading song [ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
+        print('\n' * 3)
+        print(bcolors.CGREENBG + bcolors.CBLACK + 'Downloading song [ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
         item_loc = 'downloads/' + str(spotify_playlist_id) +'/'+   ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
         if(os.path.isfile(item_loc)):
             print(search_query)
