@@ -5,9 +5,13 @@ Simple free and unlimited spotify playlist downloads
 
 HOWTO:
 
-- Install the packages required by the application using `pip3 install {package name}`
+- Install the packages required by the application using `pip3 install -r requirements.txt`
 - Enter your playlist ID at the bottom of the script
 - Run the script using `python3 run.py`
+
+Requirements:
+
+- Python 3.8
 
 How does it work?
 
