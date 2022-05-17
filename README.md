@@ -43,3 +43,44 @@
     <a href="https://github.com/couldbejake/spotify2mp3/issues/new">Request Feature</a>
   </h4>
 </div>
+
+<!-- Getting Started -->
+## 	:toolbox: Getting Started
+
+<!-- Prerequisites -->
+### :bangbang: Prerequisites
+
+This project uses Python 3.8
+
+```bash
+ npm install --global yarn
+```
+
+<!-- Installation -->
+### :gear: Installation
+
+Install desired packages using PIP 3.8
+
+```$ pip3.8 install -r requirements.txt
+```
+
+<!-- Run Locally -->
+### :running: Run Locally
+
+Clone the project
+
+```bash
+  git clone https://github.com/couldbejake/spotify2mp3.git
+```
+
+Go to the project directory
+
+```bash
+  cd spotify2mp3
+```
+
+Start the server
+
+```python3.8 run.py
+```
+
