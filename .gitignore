@@ -4,3 +4,4 @@
 *.jpg
 .DS_Store
 failed_log.txt
+test.py

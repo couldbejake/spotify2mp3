@@ -101,6 +101,8 @@ def get_song_names(playlist_id):
     return tracks
 
 
+
+
 def download_playlist(spotify_playlist_id, folder_name):
     songs = get_song_names(spotify_playlist_id)
     Path('downloads/' + str(folder_name)).mkdir(parents=True, exist_ok=True)
@@ -149,8 +151,6 @@ def download_playlist(spotify_playlist_id, folder_name):
 
                 print(bcolors.OKCYAN + ">   Downloaded mp4 without frames to " + yt_tmp_out + bcolors.ENDC + '\n')
 
-                ### POST PROCESSING
-
                 song_mp3_tmp_loc = "./temp/" + str(search_query) + '.mp3'
                 song_image_path = "./temp/" + str(search_query) + '.jpg'
                 song_final_dest = "downloads/" + str(folder_name) + "/"+ str(search_query) + '.mp3'
@@ -174,6 +174,7 @@ def download_playlist(spotify_playlist_id, folder_name):
 
                 print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
 
+
             except Exception as e:
                 f = open('failed_log.txt', 'a')
                 f.write(search_query + '\n')
@@ -189,9 +190,22 @@ def download_playlist(spotify_playlist_id, folder_name):
                     print('Please report this at https://github.com/couldbejake/spotify2mp3' + bcolors.ENDC)
                     quit()
 
-
 def main():
-    download_playlist('7rutb883T7WE7k6qZ1LjwU', "Maya's Party")
+
+    playlist_name = input('Enter the name of the playlist: ') #"Maya's Party"
+    spotify_url_link = input('Enter the spotify URL link: ') #'7rutb883T7WE7k6qZ1LjwU'
+
+    if('playlist/' in spotify_url_link):
+        spotify_url_link = spotify_url_link.split('playlist/')[1]
+    if('?' in spotify_url_link):
+        spotify_url_link = spotify_url_link.split('?')[0]
+
+    print(bcolors.WARNING + spotify_url_link + bcolors.ENDC)
+
+    download_playlist(spotify_url_link, playlist_name)
+
+    # Example Usage:
+    # download_playlist('7rutb883T7WE7k6qZ1LjwU', "Maya's Party")
 
 if __name__ == "__main__":
     main()
