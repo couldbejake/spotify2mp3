@@ -77,4 +77,4 @@ Run the script
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=couldbejake/spotify2mp3&type=Date)](https://star-history.com/#couldbejake/spotify2mp3&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=couldbejake/spotify2mp3&type=Date)](https://github.com/couldbejake/spotify2mp3/)
