@@ -75,3 +75,6 @@ Run the script
 
 `$ python3.8 run.py`
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=couldbejake/spotify2mp3&type=Date)](https://star-history.com/#couldbejake/spotify2mp3&Date)
