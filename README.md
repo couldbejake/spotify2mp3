@@ -30,9 +30,10 @@
     <img src="https://img.shields.io/github/issues/couldbejake/spotify2mp3" alt="open issues" />
   </a>
   
+  <!--
   <a href="https://github.com/couldbejake/awesome-readme-template/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/couldbejake/awesome-readme-template.svg" alt="license" />
-  </a>
+  </a>-->
 </p>
    
 <h4>
