@@ -70,7 +70,7 @@ Go to the project directory
 
 `$ cd spotify2mp3 `
 
-Start the server
+Run the script
 
 `$ python3.8 run.py`
 
