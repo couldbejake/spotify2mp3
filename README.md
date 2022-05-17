@@ -9,6 +9,10 @@ HOWTO:
 - Enter your playlist ID at the bottom of the script
 - Run the script using `python3 run.py`
 
+Requirements:
+
+- Python 3.8
+
 How does it work?
 
 - We first search the playlist and download a list of songs
