@@ -52,35 +52,25 @@
 
 This project uses Python 3.8
 
-```bash
- npm install --global yarn
-```
-
 <!-- Installation -->
 ### :gear: Installation
 
 Install desired packages using PIP 3.8
 
-```$ pip3.8 install -r requirements.txt
-```
+`$ pip3.8 install -r requirements.txt`
 
 <!-- Run Locally -->
 ### :running: Run Locally
 
 Clone the project
 
-```bash
-  git clone https://github.com/couldbejake/spotify2mp3.git
-```
+`$ git clone https://github.com/couldbejake/spotify2mp3.git`
 
 Go to the project directory
 
-```bash
-  cd spotify2mp3
-```
+`$ cd spotify2mp3 `
 
 Start the server
 
-```python3.8 run.py
-```
+`$ python3.8 run.py`
 
