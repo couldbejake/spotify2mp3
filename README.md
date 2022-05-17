@@ -52,19 +52,19 @@
 
 This project uses Python 3.8
 
-<!-- Installation -->
-### :gear: Installation
-
-Install desired packages using PIP 3.8
-
-`$ pip3.8 install -r requirements.txt`
-
 <!-- Run Locally -->
 ### :running: Run Locally
 
 Clone the project
 
 `$ git clone https://github.com/couldbejake/spotify2mp3.git`
+
+<!-- Installation -->
+### :gear: Installation
+
+Install desired packages using PIP 3.8
+
+`$ pip3.8 install -r requirements.txt`
 
 Go to the project directory
 
