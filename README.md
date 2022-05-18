@@ -75,6 +75,23 @@ Run the script
 
 `$ python3.8 run.py`
 
+
+## Extra configuration
+
+Inside `run.py` you can modify several variables to change how the script operates:
+
+- `MIN_VIEW_COUNT`: The variable that indicates how many views a video has to have before it can be used, defaults to  5000 (meaning songs with <5000 views will be ignored and the song will be skipped)
+- `MAX_LENGTH`: The maximum length a song can be and still be downloaded, defaults to  600 seconds or 10 minutes (meaning only songs shorter than 10 mins will be downloaded)
+- `FAILURE_THRESHOLD`: The number of songs that need to fail before prompting to re-run with a lower view count, defaults to 5 (meaning 5 songs or more must fail for user to be prompted)
+
+## Getting spotify playlist URL
+
+When prompted for a spotify URL link you will want to go to the [spotify web player](https://open.spotify.com/) and navigate to your playlist. The URL will be in the form `https://open.spotify.com/playlist/<URL Link>` you have two options:
+
+1. Copy-paste the entire URL
+2. Copy **just** the URL link (should just be letters and numbers), and paste that into the prompt
+
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=couldbejake/spotify2mp3&type=Date)](https://github.com/couldbejake/spotify2mp3/)
