@@ -2,7 +2,9 @@ from __future__ import unicode_literals
 
 import os
 import json
+import string
 import time
+import traceback
 import requests
 
 from pathlib import Path
@@ -32,8 +34,9 @@ BEARER_TOKEN = ""
 
 ### SETTINGS
 
-MIN_VIEW_COUNT = 20000 # 20, 000 views
+MIN_VIEW_COUNT = 5000 # 5, 000 views
 MAX_LENGTH = 60 * 10   # 10 minutes
+FAILURE_THRESHOLD = 5 # The number of songs that need to fail before prompting to re-run
 DEBUG = True
 
 ##
@@ -104,16 +107,30 @@ def get_song_names(playlist_id):
 
 
 def download_playlist(spotify_playlist_id, folder_name):
+    global MIN_VIEW_COUNT
+    legal_path_characters = string.ascii_letters + string.digits+ " ()[]" # Allowed characters in file path
+    folder_name = ''.join(current_character for current_character in folder_name if current_character in legal_path_characters)
     songs = get_song_names(spotify_playlist_id)
     Path('downloads/' + str(folder_name)).mkdir(parents=True, exist_ok=True)
     Path('temp/').mkdir(parents=True, exist_ok=True)
-    for song in songs:
-        song_name = song['name']
-        artist = song['artist']
+    failed_downloads = 0 # Counter for songs that failed to download
+    failed_song_names = "" # Stringified list of failed songs in printable format
+    skipped_songs = 0 # Counter for songs that are skipped because they already exist
+    for index, song in enumerate(songs):
+        # Sanatizing song name & Artist name for file path output
+        song_name = "".join([current_character for current_character in song["name"] if current_character in legal_path_characters])
+        artist = "".join([current_character for current_character in song['artist'] if current_character in legal_path_characters])
         song_image_url = song['song_image']
         search_query = song_name + ' ' + artist
+        song_mp3_tmp_loc = "./temp/" + str(search_query) + '.mp3'
+        song_image_path = "./temp/" + str(search_query) + '.jpg'
+        song_final_dest = "downloads/" + str(folder_name) + "/"+ str(search_query) + '.mp3'
+        if os.path.exists(song_final_dest):
+            print(f"{bcolors.WARNING}Song {search_query} already available at {song_final_dest} skipping {bcolors.ENDC}")
+            skipped_songs += 1
+            continue
         print('\n' * 3)
-        print(bcolors.CGREENBG + bcolors.CBLACK + 'Downloading song [ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
+        print(bcolors.CGREENBG + bcolors.CBLACK + f'Downloading song {index}/ {len(songs)}[ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
         item_loc = 'downloads/' + str(spotify_playlist_id) +'/'+   ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
         if(os.path.isfile(item_loc)):
             print(search_query)
@@ -151,10 +168,6 @@ def download_playlist(spotify_playlist_id, folder_name):
 
                 print(bcolors.OKCYAN + ">   Downloaded mp4 without frames to " + yt_tmp_out + bcolors.ENDC + '\n')
 
-                song_mp3_tmp_loc = "./temp/" + str(search_query) + '.mp3'
-                song_image_path = "./temp/" + str(search_query) + '.jpg'
-                song_final_dest = "downloads/" + str(folder_name) + "/"+ str(search_query) + '.mp3'
-
                 urllib.request.urlretrieve(song_image_url, song_image_path)
 
                 print(bcolors.OKCYAN + ">   Downloaded image album cover to " + yt_tmp_out + bcolors.ENDC + '\n')
@@ -174,11 +187,36 @@ def download_playlist(spotify_playlist_id, folder_name):
 
                 print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
 
-
+            except KeyError as e:
+                print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query) + "Continuing" + bcolors.ENDC + "\n")
+                f = open('failed_log.txt', 'a')
+                f.write(search_query + '\n')
+                f.write(str(e))
+                f.write('\n')
+                f.write(traceback.format_exc())
+                f.write('\n')
+                f.close()
+                failed_downloads += 1
+                failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+                continue
+            except IndexError as e:
+                print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query) + "Continuing" + bcolors.ENDC + "\n")
+                f = open('failed_log.txt', 'a')
+                f.write(search_query + '\n')
+                f.write(str(e))
+                f.write('\n')
+                f.write(traceback.format_exc())
+                f.write('\n')
+                f.close()
+                failed_downloads += 1
+                failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+                continue
             except Exception as e:
                 f = open('failed_log.txt', 'a')
                 f.write(search_query + '\n')
                 f.write(str(e))
+                f.write('\n')
+                f.write(traceback.format_exc())
                 f.write('\n')
                 f.close()
                 print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query))
@@ -189,16 +227,50 @@ def download_playlist(spotify_playlist_id, folder_name):
                 if(not isinstance(e, ConfigException)):
                     print('Please report this at https://github.com/couldbejake/spotify2mp3' + bcolors.ENDC)
                     quit()
+                else:
+                    f = open('failed_log.txt', 'a')
+                    f.write(search_query + '\n')
+                    f.write(str(e))
+                    f.write('\n')
+                    f.write(traceback.format_exc())
+                    f.write('\n')
+                    f.close()
+                    print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}")
+                    failed_downloads += 1
+                    failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+    print(f"{bcolors.OKGREEN}Successfully downloaded {len(songs) - failed_downloads - skipped_songs}/{len(songs)} songs ({skipped_songs} skipped) to {folder_name}{bcolors.ENDC}\n")
+    if failed_downloads >= FAILURE_THRESHOLD:
+        if "y" in input(f"\n\nThere were more than {FAILURE_THRESHOLD} failed downloads:\n{failed_song_names} \n\nWould you like to retry with minimum view count halfed({MIN_VIEW_COUNT//2})? (y/n) "):
+            MIN_VIEW_COUNT //= 2
+            download_playlist(spotify_playlist_id, folder_name)
+            exit()
+    if failed_downloads:
+        f = open('failed_log.txt', 'a')
+        f.write(f"\nFailed downloads for {folder_name}:\n{failed_song_names}\n")
+        f.close()
+    shutil.rmtree('./temp')
+    print(f"{bcolors.FAIL}Failed downloads:\n{failed_song_names}{bcolors.ENDC}\n")
 
-def main():
+def main(spotify_url_link=None):
 
-    playlist_name = input('Enter the name of the playlist: ') #"Maya's Party"
-    spotify_url_link = input('Enter the spotify URL link: ') #'7rutb883T7WE7k6qZ1LjwU'
+    playlist_name = input('Enter playlist name (leave blank and hit enter to pull name from spotify): ') #"Maya's Party"
+    if spotify_url_link == None:
+        spotify_url_link = input('Enter the spotify URL link: ') #'7rutb883T7WE7k6qZ1LjwU'
 
     if('playlist/' in spotify_url_link):
         spotify_url_link = spotify_url_link.split('playlist/')[1]
     if('?' in spotify_url_link):
         spotify_url_link = spotify_url_link.split('?')[0]
+
+    if not playlist_name: # Dynamically determine playlist name
+        from lxml import html
+        page = requests.get(f"https://open.spotify.com/playlist/{spotify_url_link}")
+        playlist_name = html.fromstring(page.content).xpath('/html/body/div/div/div/div/div[1]/div/div[2]/h1')[0].text_content().strip()
+        if not playlist_name: # If a playlist name still couldn't be determined recursively call function with same URL
+            print(bcolors.WARNING + 'Could not find playlist name please provide a name\n\n'+ bcolors.ENDC)
+            main(spotify_url_link)
+            exit()
+        print(bcolors.WARNING + f"Continuing with: {playlist_name=}" + bcolors.ENDC)
 
     print(bcolors.WARNING + spotify_url_link + bcolors.ENDC)
 
