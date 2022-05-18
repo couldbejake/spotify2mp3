@@ -4,6 +4,7 @@ import os
 import json
 import string
 import time
+import traceback
 import requests
 
 from pathlib import Path
@@ -33,7 +34,7 @@ BEARER_TOKEN = ""
 
 ### SETTINGS
 
-MIN_VIEW_COUNT = 20000 # 20, 000 views
+MIN_VIEW_COUNT = 5000 # 5, 000 views TODO: Change before release
 MAX_LENGTH = 60 * 10   # 10 minutes
 DEBUG = True
 
@@ -105,17 +106,27 @@ def get_song_names(playlist_id):
 
 
 def download_playlist(spotify_playlist_id, folder_name):
+    global MIN_VIEW_COUNT
     legal_path_characters = string.ascii_letters + string.digits+ " ()[]" # Allowed characters in file path
     folder_name = ''.join(current_character for current_character in folder_name if current_character in legal_path_characters)
     songs = get_song_names(spotify_playlist_id)
     Path('downloads/' + str(folder_name)).mkdir(parents=True, exist_ok=True)
     Path('temp/').mkdir(parents=True, exist_ok=True)
+    failed_downloads = 0
+    skipped_songs = 0
     for song in songs:
         # Sanatizing song name & Artist name for file path output
         song_name = "".join([current_character for current_character in song["name"] if current_character in legal_path_characters])
         artist = "".join([current_character for current_character in song['artist'] if current_character in legal_path_characters])
         song_image_url = song['song_image']
         search_query = song_name + ' ' + artist
+        song_mp3_tmp_loc = "./temp/" + str(search_query) + '.mp3'
+        song_image_path = "./temp/" + str(search_query) + '.jpg'
+        song_final_dest = "downloads/" + str(folder_name) + "/"+ str(search_query) + '.mp3'
+        if os.path.exists(song_final_dest):
+            print(f"{bcolors.WARNING}Song {search_query} already available at {song_final_dest} skipping {bcolors.ENDC}")
+            skipped_songs += 1
+            continue
         print('\n' * 3)
         print(bcolors.CGREENBG + bcolors.CBLACK + 'Downloading song [ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
         item_loc = 'downloads/' + str(spotify_playlist_id) +'/'+   ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
@@ -155,10 +166,6 @@ def download_playlist(spotify_playlist_id, folder_name):
 
                 print(bcolors.OKCYAN + ">   Downloaded mp4 without frames to " + yt_tmp_out + bcolors.ENDC + '\n')
 
-                song_mp3_tmp_loc = "./temp/" + str(search_query) + '.mp3'
-                song_image_path = "./temp/" + str(search_query) + '.jpg'
-                song_final_dest = "downloads/" + str(folder_name) + "/"+ str(search_query) + '.mp3'
-
                 urllib.request.urlretrieve(song_image_url, song_image_path)
 
                 print(bcolors.OKCYAN + ">   Downloaded image album cover to " + yt_tmp_out + bcolors.ENDC + '\n')
@@ -178,11 +185,34 @@ def download_playlist(spotify_playlist_id, folder_name):
 
                 print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
 
-
+            except KeyError:
+                print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query) + "Continuing" + bcolors.ENDC + "\n")
+                f = open('failed_log.txt', 'a')
+                f.write(search_query + '\n')
+                f.write(str(e))
+                f.write('\n')
+                f.write(traceback.format_exc())
+                f.write('\n')
+                f.close()
+                failed_downloads += 1
+                continue
+            except IndexError:
+                print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query) + "Continuing" + bcolors.ENDC + "\n")
+                f = open('failed_log.txt', 'a')
+                f.write(search_query + '\n')
+                f.write(str(e))
+                f.write('\n')
+                f.write(traceback.format_exc())
+                f.write('\n')
+                f.close()
+                failed_downloads += 1
+                continue
             except Exception as e:
                 f = open('failed_log.txt', 'a')
                 f.write(search_query + '\n')
                 f.write(str(e))
+                f.write('\n')
+                f.write(traceback.format_exc())
                 f.write('\n')
                 f.close()
                 print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query))
@@ -193,6 +223,21 @@ def download_playlist(spotify_playlist_id, folder_name):
                 if(not isinstance(e, ConfigException)):
                     print('Please report this at https://github.com/couldbejake/spotify2mp3' + bcolors.ENDC)
                     quit()
+                else:
+                    f = open('failed_log.txt', 'a')
+                    f.write(search_query + '\n')
+                    f.write(str(e))
+                    f.write('\n')
+                    f.write(traceback.format_exc())
+                    f.write('\n')
+                    f.close()
+                    print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}")
+                    failed_downloads += 1
+    print(f"{bcolors.OKGREEN}Successfully downloaded {len(songs) - failed_downloads - skipped_songs}/{len(songs)} songs ({skipped_songs} skipped).{bcolors.ENDC}\n")
+    if failed_downloads > 5:
+        if "y" in input(f"\nThere were too many failed downloads. Would you like to retry with minimum view count halfed({MIN_VIEW_COUNT//2})? (y/n) "):
+            MIN_VIEW_COUNT //= 2
+            download_playlist(spotify_playlist_id, folder_name)
 
 def main():
 
