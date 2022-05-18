@@ -75,6 +75,10 @@ Run the script
 
 `$ python3.8 run.py`
 
+## Getting spotify playlist URL
+
+When prompted for a spotify URL link you will want to go to the [spotify web player](https://open.spotify.com/) and navigate to your playlist. The URL will be in the form `https://open.spotify.com/playlist/<URL Link>` copy **just** the URL link (should just be letters and numbers), and paste that into the prompt.
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=couldbejake/spotify2mp3&type=Date)](https://github.com/couldbejake/spotify2mp3/)
