@@ -25,6 +25,10 @@ import urllib.request
 import shutil
 import json
 
+import ssl
+
+ssl._create_default_https_context = ssl._create_stdlib_context
+
 global BEARER_TOKEN
 global MIN_VIEW_COUNT
 global MAX_LENGTH
@@ -108,30 +112,40 @@ def get_song_names(playlist_id):
 
 def download_playlist(spotify_playlist_id, folder_name):
     global MIN_VIEW_COUNT
+
     legal_path_characters = string.ascii_letters + string.digits+ " ()[]" # Allowed characters in file path
     folder_name = ''.join(current_character for current_character in folder_name if current_character in legal_path_characters)
+
     songs = get_song_names(spotify_playlist_id)
+
     Path('downloads/' + str(folder_name)).mkdir(parents=True, exist_ok=True)
     Path('temp/').mkdir(parents=True, exist_ok=True)
+
     failed_downloads = 0 # Counter for songs that failed to download
     failed_song_names = "" # Stringified list of failed songs in printable format
     skipped_songs = 0 # Counter for songs that are skipped because they already exist
+
     for index, song in enumerate(songs):
+
         # Sanatizing song name & Artist name for file path output
         song_name = "".join([current_character for current_character in song["name"] if current_character in legal_path_characters])
         artist = "".join([current_character for current_character in song['artist'] if current_character in legal_path_characters])
+
         song_image_url = song['song_image']
         search_query = song_name + ' ' + artist
         song_mp3_tmp_loc = "./temp/" + str(search_query) + '.mp3'
         song_image_path = "./temp/" + str(search_query) + '.jpg'
         song_final_dest = "downloads/" + str(folder_name) + "/"+ str(search_query) + '.mp3'
+
         if os.path.exists(song_final_dest):
             print(f"{bcolors.WARNING}Song {search_query} already available at {song_final_dest} skipping {bcolors.ENDC}")
             skipped_songs += 1
             continue
+
         print('\n' * 3)
         print(bcolors.CGREENBG + bcolors.CBLACK + f'Downloading song {index}/ {len(songs)}[ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
         item_loc = 'downloads/' + str(spotify_playlist_id) +'/'+   ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
+
         if(os.path.isfile(item_loc)):
             print(search_query)
             print('\nAlready exists! Skipping!\n')
@@ -186,58 +200,29 @@ def download_playlist(spotify_playlist_id, folder_name):
                 shutil.copy(song_mp3_tmp_loc, song_final_dest)
 
                 print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
-
             except KeyError as e:
-                print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query) + "Continuing" + bcolors.ENDC + "\n")
-                f = open('failed_log.txt', 'a')
-                f.write(search_query + '\n')
-                f.write(str(e))
-                f.write('\n')
-                f.write(traceback.format_exc())
-                f.write('\n')
-                f.close()
-                failed_downloads += 1
-                failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
-                continue
-            except IndexError as e:
-                print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query) + "Continuing" + bcolors.ENDC + "\n")
-                f = open('failed_log.txt', 'a')
-                f.write(search_query + '\n')
-                f.write(str(e))
-                f.write('\n')
-                f.write(traceback.format_exc())
-                f.write('\n')
-                f.close()
-                failed_downloads += 1
-                failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
-                continue
-            except Exception as e:
-                f = open('failed_log.txt', 'a')
-                f.write(search_query + '\n')
-                f.write(str(e))
-                f.write('\n')
-                f.write(traceback.format_exc())
-                f.write('\n')
-                f.close()
-                print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query))
                 if(DEBUG):
-                    print(bcolors.FAIL)
-                    print(e)
-                    print(bcolors.ENDC)
+                    print(bcolors.FAIL + str(e) + bcolors.ENDC)
                 if(not isinstance(e, ConfigException)):
-                    print('Please report this at https://github.com/couldbejake/spotify2mp3' + bcolors.ENDC)
-                    quit()
-                else:
                     f = open('failed_log.txt', 'a')
-                    f.write(search_query + '\n')
-                    f.write(str(e))
-                    f.write('\n')
-                    f.write(traceback.format_exc())
-                    f.write('\n')
+                    f.write(search_query + '\n' + str(e))
+                    f.write('\n' + traceback.format_exc() + '\n')
                     f.close()
                     print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}")
                     failed_downloads += 1
                     failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+                    print('Please report this at https://github.com/couldbejake/spotify2mp3' + bcolors.ENDC)
+                    quit()
+                else:
+                    f = open('failed_log.txt', 'a')
+                    f.write(search_query + '\n' + str(e))
+                    f.write('\n' + traceback.format_exc() + '\n')
+                    f.close()
+                    print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}")
+                    failed_downloads += 1
+                    failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+                continue
+
     print(f"{bcolors.OKGREEN}Successfully downloaded {len(songs) - failed_downloads - skipped_songs}/{len(songs)} songs ({skipped_songs} skipped) to {folder_name}{bcolors.ENDC}\n")
     if failed_downloads >= FAILURE_THRESHOLD:
         if "y" in input(f"\n\nThere were more than {FAILURE_THRESHOLD} failed downloads:\n{failed_song_names} \n\nWould you like to retry with minimum view count halfed({MIN_VIEW_COUNT//2})? (y/n) "):

@@ -24,3 +24,6 @@ tqdm==4.64.0
 urllib3==1.26.9
 youtube-search==2.1.0
 lxml==4.8.0
+
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.12.2
