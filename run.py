@@ -34,7 +34,7 @@ BEARER_TOKEN = ""
 
 ### SETTINGS
 
-MIN_VIEW_COUNT = 5000 # 5, 000 views TODO: Change before release
+MIN_VIEW_COUNT = 5000 # 5, 000 views
 MAX_LENGTH = 60 * 10   # 10 minutes
 FAILURE_THRESHOLD = 5 # The number of songs that need to fail before prompting to re-run
 DEBUG = True
@@ -81,7 +81,6 @@ def get_song_names(playlist_id):
     while not done:
         new_token = get_new_token()
         data = get_tracks(playlist_id, offset_counter, 100, new_token)
-        print(f"{data=}")
         if(not 'total' in data):
             print(data)
             exit()
@@ -114,8 +113,9 @@ def download_playlist(spotify_playlist_id, folder_name):
     songs = get_song_names(spotify_playlist_id)
     Path('downloads/' + str(folder_name)).mkdir(parents=True, exist_ok=True)
     Path('temp/').mkdir(parents=True, exist_ok=True)
-    failed_downloads = 0
-    skipped_songs = 0
+    failed_downloads = 0 # Counter for songs that failed to download
+    failed_song_names = "" # Stringified list of failed songs in printable format
+    skipped_songs = 0 # Counter for songs that are skipped because they already exist
     for index, song in enumerate(songs):
         # Sanatizing song name & Artist name for file path output
         song_name = "".join([current_character for current_character in song["name"] if current_character in legal_path_characters])
@@ -187,7 +187,7 @@ def download_playlist(spotify_playlist_id, folder_name):
 
                 print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
 
-            except KeyError:
+            except KeyError as e:
                 print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query) + "Continuing" + bcolors.ENDC + "\n")
                 f = open('failed_log.txt', 'a')
                 f.write(search_query + '\n')
@@ -197,8 +197,9 @@ def download_playlist(spotify_playlist_id, folder_name):
                 f.write('\n')
                 f.close()
                 failed_downloads += 1
+                failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
                 continue
-            except IndexError:
+            except IndexError as e:
                 print(bcolors.WARNING +  '\nFailed to convert ' + str(search_query) + "Continuing" + bcolors.ENDC + "\n")
                 f = open('failed_log.txt', 'a')
                 f.write(search_query + '\n')
@@ -208,6 +209,7 @@ def download_playlist(spotify_playlist_id, folder_name):
                 f.write('\n')
                 f.close()
                 failed_downloads += 1
+                failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
                 continue
             except Exception as e:
                 f = open('failed_log.txt', 'a')
@@ -235,15 +237,23 @@ def download_playlist(spotify_playlist_id, folder_name):
                     f.close()
                     print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}")
                     failed_downloads += 1
-    print(f"{bcolors.OKGREEN}Successfully downloaded {len(songs) - failed_downloads - skipped_songs}/{len(songs)} songs ({skipped_songs} skipped).{bcolors.ENDC}\n")
-    if failed_downloads > FAILURE_THRESHOLD:
-        if "y" in input(f"\nThere were too many failed downloads. Would you like to retry with minimum view count halfed({MIN_VIEW_COUNT//2})? (y/n) "):
+                    failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+    print(f"{bcolors.OKGREEN}Successfully downloaded {len(songs) - failed_downloads - skipped_songs}/{len(songs)} songs ({skipped_songs} skipped) to {folder_name}{bcolors.ENDC}\n")
+    if failed_downloads >= FAILURE_THRESHOLD:
+        if "y" in input(f"\n\nThere were more than {FAILURE_THRESHOLD} failed downloads:\n{failed_song_names} \n\nWould you like to retry with minimum view count halfed({MIN_VIEW_COUNT//2})? (y/n) "):
             MIN_VIEW_COUNT //= 2
             download_playlist(spotify_playlist_id, folder_name)
+            exit()
+    if failed_downloads:
+        f = open('failed_log.txt', 'a')
+        f.write(f"\nFailed downloads for {folder_name}:\n{failed_song_names}\n")
+        f.close()
+    shutil.rmtree('./temp')
+    print(f"{bcolors.FAIL}Failed downloads:\n{failed_song_names}{bcolors.ENDC}\n")
 
 def main(spotify_url_link=None):
 
-    playlist_name = input('Enter custom name of the playlist (leave blank to pull name from spotify): ') #"Maya's Party"
+    playlist_name = input('Enter playlist name (leave blank and hit enter to pull name from spotify): ') #"Maya's Party"
     if spotify_url_link == None:
         spotify_url_link = input('Enter the spotify URL link: ') #'7rutb883T7WE7k6qZ1LjwU'
 
