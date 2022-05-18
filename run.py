@@ -36,6 +36,7 @@ BEARER_TOKEN = ""
 
 MIN_VIEW_COUNT = 5000 # 5, 000 views TODO: Change before release
 MAX_LENGTH = 60 * 10   # 10 minutes
+FAILURE_THRESHOLD = 5 # The number of songs that need to fail before prompting to re-run
 DEBUG = True
 
 ##
@@ -80,6 +81,7 @@ def get_song_names(playlist_id):
     while not done:
         new_token = get_new_token()
         data = get_tracks(playlist_id, offset_counter, 100, new_token)
+        print(f"{data=}")
         if(not 'total' in data):
             print(data)
             exit()
@@ -114,7 +116,7 @@ def download_playlist(spotify_playlist_id, folder_name):
     Path('temp/').mkdir(parents=True, exist_ok=True)
     failed_downloads = 0
     skipped_songs = 0
-    for song in songs:
+    for index, song in enumerate(songs):
         # Sanatizing song name & Artist name for file path output
         song_name = "".join([current_character for current_character in song["name"] if current_character in legal_path_characters])
         artist = "".join([current_character for current_character in song['artist'] if current_character in legal_path_characters])
@@ -128,7 +130,7 @@ def download_playlist(spotify_playlist_id, folder_name):
             skipped_songs += 1
             continue
         print('\n' * 3)
-        print(bcolors.CGREENBG + bcolors.CBLACK + 'Downloading song [ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
+        print(bcolors.CGREENBG + bcolors.CBLACK + f'Downloading song {index}/ {len(songs)}[ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
         item_loc = 'downloads/' + str(spotify_playlist_id) +'/'+   ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
         if(os.path.isfile(item_loc)):
             print(search_query)
@@ -234,20 +236,31 @@ def download_playlist(spotify_playlist_id, folder_name):
                     print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}")
                     failed_downloads += 1
     print(f"{bcolors.OKGREEN}Successfully downloaded {len(songs) - failed_downloads - skipped_songs}/{len(songs)} songs ({skipped_songs} skipped).{bcolors.ENDC}\n")
-    if failed_downloads > 5:
+    if failed_downloads > FAILURE_THRESHOLD:
         if "y" in input(f"\nThere were too many failed downloads. Would you like to retry with minimum view count halfed({MIN_VIEW_COUNT//2})? (y/n) "):
             MIN_VIEW_COUNT //= 2
             download_playlist(spotify_playlist_id, folder_name)
 
-def main():
+def main(spotify_url_link=None):
 
-    playlist_name = input('Enter the name of the playlist: ') #"Maya's Party"
-    spotify_url_link = input('Enter the spotify URL link: ') #'7rutb883T7WE7k6qZ1LjwU'
+    playlist_name = input('Enter custom name of the playlist (leave blank to pull name from spotify): ') #"Maya's Party"
+    if spotify_url_link == None:
+        spotify_url_link = input('Enter the spotify URL link: ') #'7rutb883T7WE7k6qZ1LjwU'
 
     if('playlist/' in spotify_url_link):
         spotify_url_link = spotify_url_link.split('playlist/')[1]
     if('?' in spotify_url_link):
         spotify_url_link = spotify_url_link.split('?')[0]
+
+    if not playlist_name: # Dynamically determine playlist name
+        from lxml import html
+        page = requests.get(f"https://open.spotify.com/playlist/{spotify_url_link}")
+        playlist_name = html.fromstring(page.content).xpath('/html/body/div/div/div/div/div[1]/div/div[2]/h1')[0].text_content().strip()
+        if not playlist_name: # If a playlist name still couldn't be determined recursively call function with same URL
+            print(bcolors.WARNING + 'Could not find playlist name please provide a name\n\n'+ bcolors.ENDC)
+            main(spotify_url_link)
+            exit()
+        print(bcolors.WARNING + f"Continuing with: {playlist_name=}" + bcolors.ENDC)
 
     print(bcolors.WARNING + spotify_url_link + bcolors.ENDC)
 
