@@ -105,16 +105,15 @@ def get_song_names(playlist_id):
 
 
 def download_playlist(spotify_playlist_id, folder_name):
+    legal_path_characters = string.ascii_letters + string.digits+ " ()[]" # Allowed characters in file path
+    folder_name = ''.join(current_character for current_character in folder_name if current_character in legal_path_characters)
     songs = get_song_names(spotify_playlist_id)
     Path('downloads/' + str(folder_name)).mkdir(parents=True, exist_ok=True)
     Path('temp/').mkdir(parents=True, exist_ok=True)
-    legal_path_characters = string.ascii_letters + string.digits+ " ()[]" # Allowed characters in file path
     for song in songs:
         # Sanatizing song name & Artist name for file path output
-        sanatized_song_name = "".join([current_character for current_character in song["name"] if current_character in legal_path_characters])
-        song_name = sanatized_song_name
-        sanatized_artist_name = "".join([current_character for current_character in song['artist'] if current_character in legal_path_characters])
-        artist = sanatized_artist_name
+        song_name = "".join([current_character for current_character in song["name"] if current_character in legal_path_characters])
+        artist = "".join([current_character for current_character in song['artist'] if current_character in legal_path_characters])
         song_image_url = song['song_image']
         search_query = song_name + ' ' + artist
         print('\n' * 3)
