@@ -1,11 +1,15 @@
 from __future__ import unicode_literals
 
-import os
-import json
+
+import urllib.request
 import string
 import time
+import json
 import traceback
 import requests
+import shutil
+
+import json, ssl, re, os
 
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -24,11 +28,6 @@ from eyed3.id3.frames import ImageFrame
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
-import urllib.request
-import shutil
-import json
-
-import ssl
 
 ssl._create_default_https_context = ssl._create_stdlib_context
 
@@ -162,9 +161,9 @@ def download_playlist(spotify_playlist_id, folder_name):
                 print('Duration: ' + bcolors.UNDERLINE + yt_data['duration'] + bcolors.ENDC + '\n')
 
                 sd_data = yt_data['duration'].split(':')
-
                 song_duration = int(sd_data[0]) * 60  + int(sd_data[1])
-                song_viewcount = int(yt_data['views'].split(' ')[0].replace(',', ''))
+
+                song_viewcount = int(re.sub('[^0-9]','', yt_data['views']))
 
                 song_link = "https://www.youtube.com" + yt_data['url_suffix']
                 song_albumc_link = yt_data['thumbnails'][0]
@@ -244,9 +243,12 @@ def download_playlist(spotify_playlist_id, folder_name):
 
 def main(spotify_url_link=None):
 
-    playlist_name = input('Enter playlist name (leave blank and hit enter to pull name from spotify): ') #"Maya's Party"
+    #playlist_name = input('Enter playlist name (leave blank and hit enter to pull name from spotify): ') #"Maya's Party"
+
+    playlist_name = False
+
     if spotify_url_link == None:
-        spotify_url_link = input('Enter the spotify URL link: ') #'7rutb883T7WE7k6qZ1LjwU'
+        spotify_url_link = input('\nEnter the spotify URL link: ') #'7rutb883T7WE7k6qZ1LjwU'
 
     if('playlist/' in spotify_url_link):
         spotify_url_link = spotify_url_link.split('playlist/')[1]
@@ -258,12 +260,12 @@ def main(spotify_url_link=None):
         page = requests.get(f"https://open.spotify.com/playlist/{spotify_url_link}")
         playlist_name = html.fromstring(page.content).xpath('/html/body/div/div/div/div/div[1]/div/div[2]/h1')[0].text_content().strip()
         if not playlist_name: # If a playlist name still couldn't be determined recursively call function with same URL
-            print(bcolors.WARNING + 'Could not find playlist name please provide a name\n\n'+ bcolors.ENDC)
+            print(bcolors.WARNING + '\nCould not find playlist name please provide a name\n\n'+ bcolors.ENDC)
             main(spotify_url_link)
             exit()
-        print(bcolors.WARNING + f"Continuing with: {playlist_name=}" + bcolors.ENDC)
+        print(bcolors.WARNING + f"\nContinuing with: {playlist_name=}" + bcolors.ENDC)
 
-    print(bcolors.WARNING + spotify_url_link + bcolors.ENDC)
+    print(bcolors.WARNING + '\nDownloading from: ' + spotify_url_link + bcolors.ENDC)
 
     download_playlist(spotify_url_link, playlist_name)
 
