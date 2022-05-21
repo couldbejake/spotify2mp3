@@ -21,6 +21,9 @@ from moviepy.editor import *
 import eyed3
 from eyed3.id3.frames import ImageFrame
 
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
+
 import urllib.request
 import shutil
 import json
@@ -208,7 +211,7 @@ def download_playlist(spotify_playlist_id, folder_name):
                     f.write(search_query + '\n' + str(e))
                     f.write('\n' + traceback.format_exc() + '\n')
                     f.close()
-                    print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}")
+                    print(f"{bcolors.WARNING}Failed to convert {search_query} due to error.{bcolors.ENDC}. See failed_log.txt for more information.")
                     failed_downloads += 1
                     failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
                     print('Please report this at https://github.com/couldbejake/spotify2mp3' + bcolors.ENDC)
@@ -218,21 +221,24 @@ def download_playlist(spotify_playlist_id, folder_name):
                     f.write(search_query + '\n' + str(e))
                     f.write('\n' + traceback.format_exc() + '\n')
                     f.close()
-                    print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}")
+                    print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}. See failed_log.txt for more information.")
                     failed_downloads += 1
                     failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
                 continue
 
     print(f"{bcolors.OKGREEN}Successfully downloaded {len(songs) - failed_downloads - skipped_songs}/{len(songs)} songs ({skipped_songs} skipped) to {folder_name}{bcolors.ENDC}\n")
+
     if failed_downloads >= FAILURE_THRESHOLD:
-        if "y" in input(f"\n\nThere were more than {FAILURE_THRESHOLD} failed downloads:\n{failed_song_names} \n\nWould you like to retry with minimum view count halfed({MIN_VIEW_COUNT//2})? (y/n) "):
+        if "y" in input(f"\n\nThere were more than {FAILURE_THRESHOLD} failed downloads:\n{failed_song_names} \n\nWould you like to retry with minimum view count halfed ({MIN_VIEW_COUNT//2})? (y/n) "):
             MIN_VIEW_COUNT //= 2
             download_playlist(spotify_playlist_id, folder_name)
             exit()
+
     if failed_downloads:
         f = open('failed_log.txt', 'a')
         f.write(f"\nFailed downloads for {folder_name}:\n{failed_song_names}\n")
         f.close()
+
     shutil.rmtree('./temp')
     print(f"{bcolors.FAIL}Failed downloads:\n{failed_song_names}{bcolors.ENDC}\n")
 
