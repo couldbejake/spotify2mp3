@@ -51,7 +51,7 @@
 <!-- Prerequisites -->
 ### :bangbang: Prerequisites
 
-This project uses Python 3.8
+Ideally use **Python 3.8.0** but works down to Python 3.1.0
 
 <!-- Run Locally -->
 ### :running: Run Locally
