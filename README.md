@@ -95,3 +95,11 @@ When prompted for a spotify URL link you will want to go to the [spotify web pla
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=couldbejake/spotify2mp3&type=Date)](https://github.com/couldbejake/spotify2mp3/)
+
+## Troubleshooting
+
+If you get the error 'could not find match for ^\w+\W' install this temporary patch by JazPin;
+
+`pip3 uninstall pytube`
+
+`python3 -m pip install git+https://github.com/JazPin/pytube`
