@@ -202,10 +202,19 @@ def download_playlist(spotify_playlist_id, folder_name):
                 shutil.copy(song_mp3_tmp_loc, song_final_dest)
 
                 print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
-            except KeyError as e:
+            except Exception as e:
+                # TODO: implement other exception
                 if(DEBUG):
                     print(bcolors.FAIL + str(e) + bcolors.ENDC)
-                if(not isinstance(e, ConfigException)):
+                if(isinstance(e, KeyError)):
+                    f = open('failed_log.txt', 'a')
+                    f.write(search_query + '\n' + str(e))
+                    f.write('\n' + traceback.format_exc() + '\n')
+                    f.close()
+                    print(f"{bcolors.WARNING}Failed to convert {search_query} due to error.{bcolors.ENDC}. \nVideo may be age restricted.")
+                    failed_downloads += 1
+                    failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+                elif(not isinstance(e, ConfigException)):
                     f = open('failed_log.txt', 'a')
                     f.write(search_query + '\n' + str(e))
                     f.write('\n' + traceback.format_exc() + '\n')
