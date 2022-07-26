@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 
+import readline
 import urllib.request
 import string
 import time
