@@ -154,7 +154,8 @@ def download_playlist(spotify_playlist_id, folder_name):
         else:
             try:
                 yt_results = YoutubeSearch(search_query, max_results=1).to_json()
-
+                if len(json.loads(yt_results)['videos']) < 1:
+                    raise ConfigException('Skipped song -- Could not load from YouTube')
                 yt_data = json.loads(yt_results)['videos'][0]
 
                 print('View Count: ' + bcolors.UNDERLINE + yt_data['views'] + bcolors.ENDC)
