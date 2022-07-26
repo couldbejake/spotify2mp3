@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 
+import readline
 import urllib.request
 import string
 import time
@@ -154,7 +155,8 @@ def download_playlist(spotify_playlist_id, folder_name):
         else:
             try:
                 yt_results = YoutubeSearch(search_query, max_results=1).to_json()
-
+                if len(json.loads(yt_results)['videos']) < 1:
+                    raise ConfigException('Skipped song -- Could not load from YouTube')
                 yt_data = json.loads(yt_results)['videos'][0]
 
                 print('View Count: ' + bcolors.UNDERLINE + yt_data['views'] + bcolors.ENDC)
@@ -267,6 +269,14 @@ def main(spotify_url_link=None):
     if not playlist_name: # Dynamically determine playlist name
         from lxml import html
         page = requests.get(f"https://open.spotify.com/playlist/{spotify_url_link}")
+        if not page:
+            if len(spotify_url_link) > 8:
+                print(bcolors.WARNING + f"\nCould not find a Spotify playlist with the ID '{spotify_url_link[0:8]}..'" + bcolors.ENDC)
+            else:
+                print(bcolors.WARNING + f"\nCould not find a Spotify playlist with the ID '{spotify_url_link}'" + bcolors.ENDC)
+            print(bcolors.FAIL + "Please enter a valid Spotify playlist ID or URL" + bcolors.ENDC)
+            main()
+            exit()
         playlist_name = html.fromstring(page.content).xpath('/html/body/div/div/div/div/div[1]/div/div[2]/h1')[0].text_content().strip()
         if not playlist_name: # If a playlist name still couldn't be determined recursively call function with same URL
             print(bcolors.WARNING + '\nCould not find playlist name please provide a name\n\n'+ bcolors.ENDC)
