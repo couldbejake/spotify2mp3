@@ -80,7 +80,7 @@ Run the script
 
 Inside `run.py` you can modify several variables to change how the script operates:
 
-- `MIN_VIEW_COUNT`: The variable that indicates how many views a video has to have before it can be used, defaults to  5000 (meaning songs with <5000 views will be ignored and the song will be skipped)
+- `MIN_VIEW_COUNT`: The variable that indicates how many views a video has to have before it can be used, defaults to  5000 (meaning songs with less than 5000 views will be ignored and the song will be skipped)
 - `MAX_LENGTH`: The maximum length a song can be and still be downloaded, defaults to  600 seconds or 10 minutes (meaning only songs shorter than 10 mins will be downloaded)
 - `FAILURE_THRESHOLD`: The number of songs that need to fail before prompting to re-run with a lower view count, defaults to 5 (meaning 5 songs or more must fail for user to be prompted)
 
