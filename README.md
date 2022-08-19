@@ -63,13 +63,13 @@ Clone the project
 <!-- Installation -->
 ### :gear: Installation
 
-Install desired packages using PIP 3.8
-
-`$ pip3.8 install -r requirements.txt`
-
 Go to the project directory
 
 `$ cd spotify2mp3 `
+
+Install desired packages using PIP 3.8
+
+`$ pip3.8 install -r requirements.txt`
 
 Run the script
 
