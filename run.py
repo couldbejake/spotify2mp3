@@ -68,7 +68,7 @@ class ConfigException(Exception):
 
 def get_new_token():
     r = requests.request("GET", "https://open.spotify.com/")
-    r_text = BeautifulSoup(r.content, "html.parser").find("script", {"id": "config"}).get_text()
+    r_text = BeautifulSoup(r.content, "html.parser").find("script", {"id": "session"}).get_text()
     return json.loads(r_text)['accessToken']
 
 def get_tracks(playlist_id, offset, limit, token):
@@ -146,7 +146,7 @@ def download_playlist(spotify_playlist_id, folder_name):
             continue
 
         print('\n' * 3)
-        print(bcolors.CGREENBG + bcolors.CBLACK + f'Downloading song {index}/ {len(songs)}[ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
+        print(bcolors.CGREENBG + bcolors.CBLACK + f'Downloading song {index}/ {len(songs)} [ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
         item_loc = 'downloads/' + str(spotify_playlist_id) +'/'+   ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
 
         if(os.path.isfile(item_loc)):
