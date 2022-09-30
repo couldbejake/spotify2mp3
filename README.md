@@ -1,5 +1,3 @@
-Fixed bug (3rd September, which stopped spotify2mp3 downloading songs).
-
 <div align="center">
 
   <img src="assets/logo.png" alt="logo" width="200" height="auto" />
