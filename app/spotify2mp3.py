@@ -121,7 +121,7 @@ def download_playlist(spotify_playlist_id, folder_name):
 
     songs = get_song_names(spotify_playlist_id)
 
-    Path('downloads/' + str(folder_name)).mkdir(parents=True, exist_ok=True)
+    Path('/downloads/' + str(folder_name)).mkdir(parents=True, exist_ok=True)
     Path('temp/').mkdir(parents=True, exist_ok=True)
 
     failed_downloads = 0 # Counter for songs that failed to download
@@ -138,7 +138,7 @@ def download_playlist(spotify_playlist_id, folder_name):
         search_query = song_name + ' ' + artist
         song_mp3_tmp_loc = "./temp/" + str(search_query) + '.mp3'
         song_image_path = "./temp/" + str(search_query) + '.jpg'
-        song_final_dest = "downloads/" + str(artist + " - " + song_name) + '.mp3'
+        song_final_dest = "/downloads/" + str(artist + " - " + song_name) + '.mp3'
 
         if os.path.exists(song_final_dest):
             print(f"{bcolors.WARNING}Song {search_query} already available at {song_final_dest} skipping {bcolors.ENDC}")
@@ -147,7 +147,7 @@ def download_playlist(spotify_playlist_id, folder_name):
 
         print('\n' * 3)
         print(bcolors.CGREENBG + bcolors.CBLACK + f'Downloading song {index}/ {len(songs)} [ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
-        item_loc = 'downloads/' + ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
+        item_loc = '/downloads/' + ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
 
         if(os.path.isfile(item_loc)):
             print(search_query)
