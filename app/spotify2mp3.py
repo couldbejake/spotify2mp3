@@ -138,7 +138,7 @@ def download_playlist(spotify_playlist_id, folder_name):
         search_query = song_name + ' ' + artist
         song_mp3_tmp_loc = "./temp/" + str(search_query) + '.mp3'
         song_image_path = "./temp/" + str(search_query) + '.jpg'
-        song_final_dest = "downloads/" + str(folder_name) + "/"+ str(search_query) + '.mp3'
+        song_final_dest = "downloads/" + str(artist + " - " + song_name) + '.mp3'
 
         if os.path.exists(song_final_dest):
             print(f"{bcolors.WARNING}Song {search_query} already available at {song_final_dest} skipping {bcolors.ENDC}")
@@ -147,7 +147,7 @@ def download_playlist(spotify_playlist_id, folder_name):
 
         print('\n' * 3)
         print(bcolors.CGREENBG + bcolors.CBLACK + f'Downloading song {index}/ {len(songs)} [ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
-        item_loc = 'downloads/' + str(spotify_playlist_id) +'/'+   ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
+        item_loc = 'downloads/' + ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
 
         if(os.path.isfile(item_loc)):
             print(search_query)
@@ -199,6 +199,8 @@ def download_playlist(spotify_playlist_id, folder_name):
                 if (audiofile.tag == None):
                     audiofile.initTag()
                 audiofile.tag.images.set(ImageFrame.FRONT_COVER, open(song_image_path, 'rb').read(), 'image/jpeg')
+                audiofile.tag.artist = artist
+                audiofile.tag.title = song_name
                 audiofile.tag.save()
 
                 shutil.copy(song_mp3_tmp_loc, song_final_dest)
