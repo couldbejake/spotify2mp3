@@ -14,7 +14,14 @@ docker build . -t dockify2mp3
 
 ## Using the image
 
+-v allows you to map a local directory to a container-directory:
+
 ```
+# Unix environments
+docker run -it -v /downloads:/downloads
+
+# Microsoft Windows-Environment
 docker run -it -v C:/downloads:/downloads dockify2mp3 sh
+
 python spotify2mp3.run
 ```
