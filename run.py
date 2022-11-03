@@ -166,7 +166,7 @@ def download_playlist(spotify_playlist_id, folder_name):
                 song_duration = int(sd_data[0]) * 60  + int(sd_data[1])
 
                 viewcount = re.sub('[^0-9]','', yt_data['views'])
-                song_viewcount = int(viewcount) if viewcount.isdigit() else 0
+                song_viewcount = int(viewcount) if str(viewcount).isdigit() else 0
 
                 song_link = "https://www.youtube.com" + yt_data['url_suffix']
                 song_albumc_link = yt_data['thumbnails'][0]
