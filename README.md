@@ -86,6 +86,10 @@ Inside `run.py` you can modify several variables to change how the script operat
 
 ## Getting spotify playlist URL
 
+Paste a Spotify *playlist* URL into the program.
+
+### Troubleshooting
+
 When prompted for a spotify URL link you will want to go to the [spotify web player](https://open.spotify.com/) and navigate to your playlist. The URL will be in the form `https://open.spotify.com/playlist/<URL Link>` you have two options:
 
 1. Copy-paste the entire URL
@@ -98,8 +102,6 @@ When prompted for a spotify URL link you will want to go to the [spotify web pla
 
 ## Troubleshooting
 
-If you get the error 'could not find match for ^\w+\W' install this temporary patch by JazPin;
+If you are attempting to download an album, this will simply not work as this han't been implemented.
 
-`pip3 uninstall pytube`
-
-`python3 -m pip install git+https://github.com/JazPin/pytube`
+As a solution, on Spotify on your computer, copy all songs from the chosen album into a playlist, and download from there 👍
