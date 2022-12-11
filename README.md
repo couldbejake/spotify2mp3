@@ -102,6 +102,6 @@ When prompted for a spotify URL link you will want to go to the [spotify web pla
 
 ## Troubleshooting
 
-If you are attempting to download an album, this will simply not work as this han't been implemented.
+If you are attempting to download an album, this will simply not work as this feature simply has not been implemented.
 
-As a solution, on Spotify on your computer, copy all songs from the chosen album into a playlist, and download from there 👍
+As a temporary solution, load Spotify on your computer, copy all songs from the chosen album into a playlist, and download from there.
