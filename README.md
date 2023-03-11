@@ -88,8 +88,6 @@ Inside `run.py` you can modify several variables to change how the script operat
 
 Paste a Spotify *playlist* URL into the program.
 
-### Troubleshooting
-
 When prompted for a spotify URL link you will want to go to the [spotify web player](https://open.spotify.com/) and navigate to your playlist. The URL will be in the form `https://open.spotify.com/playlist/<URL Link>` you have two options:
 
 1. Copy-paste the entire URL
