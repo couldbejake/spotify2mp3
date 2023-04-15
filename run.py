@@ -206,35 +206,29 @@ def download_playlist(spotify_playlist_id, folder_name):
 
                 print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
             except Exception as e:
+                
                 # TODO: implement other exception
+                
                 if(DEBUG):
                     print(bcolors.FAIL + str(e) + bcolors.ENDC)
+                    
+                f = open('failed_log.txt', 'a')
+                f.write(search_query + '\n' + str(e))
+                f.write('\n' + traceback.format_exc() + '\n')
+                f.close()
+                
+                failed_downloads += 1
+                failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+                
                 if(isinstance(e, KeyError)):
-                    f = open('failed_log.txt', 'a')
-                    f.write(search_query + '\n' + str(e))
-                    f.write('\n' + traceback.format_exc() + '\n')
-                    f.close()
                     print(f"{bcolors.WARNING}Failed to convert {search_query} due to error.{bcolors.ENDC}. \nVideo may be age restricted.")
-                    failed_downloads += 1
-                    failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
                 elif(not isinstance(e, ConfigException)):
-                    f = open('failed_log.txt', 'a')
-                    f.write(search_query + '\n' + str(e))
-                    f.write('\n' + traceback.format_exc() + '\n')
-                    f.close()
                     print(f"{bcolors.WARNING}Failed to convert {search_query} due to error.{bcolors.ENDC}. See failed_log.txt for more information.")
-                    failed_downloads += 1
-                    failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
                     print('Please report this at https://github.com/couldbejake/spotify2mp3' + bcolors.ENDC)
                     quit()
                 else:
-                    f = open('failed_log.txt', 'a')
-                    f.write(search_query + '\n' + str(e))
-                    f.write('\n' + traceback.format_exc() + '\n')
-                    f.close()
                     print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}. See failed_log.txt for more information.")
-                    failed_downloads += 1
-                    failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+
                 continue
 
     print(f"{bcolors.OKGREEN}Successfully downloaded {len(songs) - failed_downloads - skipped_songs}/{len(songs)} songs ({skipped_songs} skipped) to {folder_name}{bcolors.ENDC}\n")
