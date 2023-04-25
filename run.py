@@ -163,7 +163,7 @@ def download_playlist(spotify_playlist_id, folder_name, linkAdd, token=NULL):
     Path('temp/').mkdir(parents=True, exist_ok=True)
 
     failed_downloads = 0 # Counter for songs that failed to download
-    # failed_song_names = "" # Stringified list of failed songs in printable format
+    failed_song_names = "" # Stringified list of failed songs in printable format
     skipped_songs = 0 # Counter for songs that are skipped because they already exist
 
     for index, song in enumerate(songs):
