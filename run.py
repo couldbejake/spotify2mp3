@@ -158,7 +158,8 @@ def download_playlist(spotify_playlist_id, folder_name, linkAdd, token=NULL):
     songs = get_song_names(spotify_playlist_id, linkAdd, token) # {'name': 'name', 'artist': 'artist', 'song_image': 'song_image'}
 
     Path('downloads/' + str(folder_name)).mkdir(parents=True, exist_ok=True)
-    Path(PATH_TO_JELLYFIN + str(folder_name)).mkdir(parents=True, exist_ok=True)
+    if len(PATH_TO_JELLYFIN) > 0:
+        Path(PATH_TO_JELLYFIN + str(folder_name)).mkdir(parents=True, exist_ok=True)
     Path('temp/').mkdir(parents=True, exist_ok=True)
 
     failed_downloads = 0 # Counter for songs that failed to download
@@ -255,8 +256,10 @@ def download_playlist(spotify_playlist_id, folder_name, linkAdd, token=NULL):
                 audiofile.tag.save()
 
                 shutil.copy(song_mp3_tmp_loc, song_final_dest)
-                jfDir = PATH_TO_JELLYFIN + str(folder_name) + "/"+ str(search_query) + '.mp3'
-                shutil.copy(song_mp3_tmp_loc, jfDir)
+
+                if len(PATH_TO_JELLYFIN) > 0:
+                    jfDir = PATH_TO_JELLYFIN + str(folder_name) + "/"+ str(search_query) + '.mp3'
+                    shutil.copy(song_mp3_tmp_loc, jfDir)
 
                 # print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
             except Exception as e:
