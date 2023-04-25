@@ -372,7 +372,7 @@ def main(spotify_url_link=None, is_web_service=False, playlist_name_web=''):
 
                     playlist_name = playlist_name_web
                 else:
-                    playlist_name = input()
+                    playlist_name = input('\nCould not find playlist name please provide a name\n\n')
                     # main(spotify_url_link)
                     # exit()
         # print(bcolors.WARNING + f"\nContinuing with: {playlist_name=}" + bcolors.ENDC)
