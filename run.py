@@ -57,6 +57,67 @@ def get_new_token():
     r_text = BeautifulSoup(r.content, "html.parser").find("script", {"id": "session"}).get_text()
     return json.loads(r_text)['accessToken']
 
+
+    
+#funzioni simpatiche per passare dall'id al codice utilizzato --> id è un base 62, lo devo trasformare in un base hex
+BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+def decode(string, alphabet=BASE62):
+    """Decode a Base X encoded string into the number
+
+    Arguments:
+    - `string`: The encoded string
+    - `alphabet`: The alphabet to use for decoding
+    """
+    base = len(alphabet)
+    strlen = len(string)
+    num = 0
+
+    idx = 0
+    for char in string:
+        power = (strlen - (idx + 1))
+        num += alphabet.index(char) * (base ** power)
+        idx += 1
+
+    return num
+
+
+def encode(num, alphabet=BASE62):
+    """Encode a positive number into Base X and return the string.
+
+    Arguments:
+    - `num`: The number to encode
+    - `alphabet`: The alphabet to use for encoding
+    """
+    if num == 0:
+        return alphabet[0]
+    arr = []
+    arr_append = arr.append  # Extract bound-method for faster access.
+    _divmod = divmod  # Access to locals is faster.
+    base = len(alphabet)
+    while num:
+        num, rem = _divmod(num, base)
+        arr_append(alphabet[rem])
+    arr.reverse()
+    return ''.join(arr)
+
+
+def getActualId(id):
+    songId=id
+    encodedIdBase10 = decode(songId)
+    encodedIdBase16 = encode(encodedIdBase10, '0123456789abcdef')
+    return encodedIdBase16
+
+def getActualIdFromEncoded(id):
+    encodedIdBase10 = decode(id, '0123456789abcdef')
+    encodedIdBase62 = encode(encodedIdBase10)
+    # Aggiunge uno 0 all'inizio se la lunghezza della stringa risultante è dispari
+    if len(encodedIdBase62) % 2 != 0:
+        encodedIdBase62 = '0' + encodedIdBase62
+    return encodedIdBase62
+
+
+
 def get_tracks(playlist_id, offset, limit, token, linkAdd):
     headers = {
         'authorization': 'Bearer ' + str(token),
@@ -99,7 +160,56 @@ def get_tracks(playlist_id, offset, limit, token, linkAdd):
             )
             
         return compiled_data
+    
+    elif linkAdd == 'track':
+        headers = {
+            'authorization': 'Bearer ' + str(token),
+            'Sec-Fetch-Dest': 'empty',
+            'accept' : 'application/json',
+            'accept-encoding' : 'gzip, deflate, br',
+            'accept-language' : 'it',
+            'app-platform' : 'WebPlayer',
+            'content-type' : 'application/json;charset=UTF-8',
+            'origin' : 'https://open.spotify.com',
+            'referer' : 'https://open.spotify.com/',
+            'sec-ch-ua' : '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
+            'sec-ch-ua-mobile' : '?0',
+            'sec-ch-ua-platform' : '"Windows"',
+            'sec-fetch-dest' : 'empty',
+            'sec-fetch-mode' : 'cors',
+            'sec-fetch-site' : 'same-site',
+            'spotify-app-version' : '1.2.2.107.gd5d28b77',
+            'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+        }
+        songId = getActualId(playlist_id)  
+        trackMetaData = json.loads(requests.get(f'https://spclient.wg.spotify.com/metadata/4/track/{songId}?market=from_token', headers=headers).text)
+        albumId = getActualIdFromEncoded(trackMetaData['album']['gid'])
+
+        #song metadata
+        query='{"uri":"spotify:album:' +albumId+ '","locale":""}&extensions={"persistedQuery":{"version":1,"sha256Hash":"411f31a2759bcb644bf85c58d2f227ca33a06d30fbb0b49d0f6f264fda05ecd8"}}'
+        encoded = urllib.parse.quote(query).replace("%20", "").replace("%26", "&").replace("%3D", "=")
+        link = "https://api-partner.spotify.com/pathfinder/v1/query?operationName=getAlbumMetadata&variables="+encoded
+        responseStr =  requests.request("GET", link, headers=headers).text
+        response =  json.loads(responseStr)
+        song_image = response['data']['albumUnion']['coverArt']['sources'][2]['url']
+
         
+        name = response['data']['albumUnion']['name']
+        artist=''
+        artists = response['data']['albumUnion']['artists']['items']
+        for currArtist in artists:
+            artist += currArtist['profile']['name'] + " "
+
+        compiled_data=[]
+        compiled_data.append(
+            {
+            'name': name,
+            'artist': artist,
+            'song_image': song_image,
+            }
+        )
+            
+        return compiled_data
     else:
         url = "https://api.spotify.com/v1/playlists/" + str(playlist_id) + "/tracks?offset=" + str(offset) + "&limit=" + str(limit) + "&market=GB"
         payload={}
@@ -118,7 +228,7 @@ def get_song_names(playlist_id, linkAdd, token):
             new_token = token
             
         data = get_tracks(playlist_id, offset_counter, 100, new_token, linkAdd)
-        if linkAdd == 'album':
+        if linkAdd == 'album' or linkAdd == 'track':
             return data
 
         if(not 'total' in data):
@@ -263,6 +373,7 @@ def download_playlist(spotify_playlist_id, folder_name, linkAdd, token=NULL):
 
                 # print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
             except Exception as e:
+                print(e)
                 # TODO: implement other exception
                 if(DEBUG):
                     ''
@@ -326,6 +437,9 @@ def main(spotify_url_link=None, is_web_service=False, playlist_name_web=''):
     if('album/' in spotify_url_link):
         spotify_url_link = spotify_url_link.split('album/')[1]
         linkAdd = 'album'
+    if('track/' in spotify_url_link):
+        spotify_url_link = spotify_url_link.split('track/')[1]
+        linkAdd = 'track'
     if('?' in spotify_url_link):
         spotify_url_link = spotify_url_link.split('?')[0]
 
@@ -366,6 +480,30 @@ def main(spotify_url_link=None, is_web_service=False, playlist_name_web=''):
                 link = "https://api-partner.spotify.com/pathfinder/v1/query?operationName=getAlbumMetadata&variables="+encoded
                 response =  json.loads(requests.request("GET", link, headers=headers).text)
                 playlist_name = response['data']['albumUnion']['name']
+            elif linkAdd == 'track':
+                token = get_new_token()
+                headers = {
+                'authorization': 'Bearer ' + str(token),
+                'Sec-Fetch-Dest': 'empty',
+                'accept' : 'application/json',
+                'accept-encoding' : 'gzip, deflate, br',
+                'accept-language' : 'it',
+                'app-platform' : 'WebPlayer',
+                'content-type' : 'application/json;charset=UTF-8',
+                'origin' : 'https://open.spotify.com',
+                'referer' : 'https://open.spotify.com/',
+                'sec-ch-ua' : '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
+                'sec-ch-ua-mobile' : '?0',
+                'sec-ch-ua-platform' : '"Windows"',
+                'sec-fetch-dest' : 'empty',
+                'sec-fetch-mode' : 'cors',
+                'sec-fetch-site' : 'same-site',
+                'spotify-app-version' : '1.2.2.107.gd5d28b77',
+                'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+                }
+                songId = getActualId(spotify_url_link)  
+                trackMetaData = json.loads(requests.get(f'https://spclient.wg.spotify.com/metadata/4/track/{songId}?market=from_token', headers=headers).text)
+                playlist_name = trackMetaData['album']['name']
             else: 
                 # print(bcolors.WARNING + '\nCould not find playlist name please provide a name\n\n'+ bcolors.ENDC)
                 
