@@ -4,7 +4,7 @@
   <h1>Spotify2mp3</h1>
   
   <p>
-    Simple free and unlimited Spotify MP3 downloads
+    Simple, free, and unlimited Spotify MP3 downloads
   </p>
   
   
