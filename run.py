@@ -330,7 +330,7 @@ def download_playlist(spotify_playlist_id, folder_name, linkAdd, token=NULL):
                     # print(bcolors.CVIOLETBG2 + bcolors.CBLACK  + 'Change MIN_VIEW_COUNT in the script to prevent skipping' + bcolors.ENDC)
                     raise ConfigException('Skipped song due to MIN_VIEW_COUNT value in script')
 
-                yt_dl_obj = YouTube(song_link)
+                yt_dl_obj = YouTube(song_link, use_oauth=True, allow_oauth_cache=True)
                 yt_vid_obj = yt_dl_obj.streams.filter(only_audio=True)
                 
                 #select the best audio quality

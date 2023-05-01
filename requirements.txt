@@ -16,7 +16,7 @@ packaging==21.3
 Pillow==9.1.1
 proglog==0.1.10
 pyparsing==3.0.9
-pytube==12.1.0
+pytube
 requests==2.27.1
 soupsieve==2.3.2.post1
 toml==0.10.2
