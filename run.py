@@ -133,6 +133,7 @@ def get_tracks(playlist_id, offset, limit, token, linkAdd):
         link = "https://api-partner.spotify.com/pathfinder/v1/query?operationName=getAlbumMetadata&variables="+encoded
         response =  json.loads(requests.request("GET", link, headers=headers).text)
         song_image = response['data']['albumUnion']['coverArt']['sources'][2]['url']
+        album_name = response['data']['albumUnion']['name']
         
         #song name and artist
         query='{"uri":"spotify:album:' +albumId+ '","offset":0,"limit":300}&extensions={"persistedQuery":{"version":1,"sha256Hash":"f387592b8a1d259b833237a51ed9b23d7d8ac83da78c6f4be3e6a08edef83d5b"}}'
@@ -156,6 +157,7 @@ def get_tracks(playlist_id, offset, limit, token, linkAdd):
                 'name': name,
                 'artist': artist,
                 'song_image': song_image,
+                'album_name': album_name
                 }
             )
             
@@ -192,6 +194,7 @@ def get_tracks(playlist_id, offset, limit, token, linkAdd):
         responseStr =  requests.request("GET", link, headers=headers).text
         response =  json.loads(responseStr)
         song_image = response['data']['albumUnion']['coverArt']['sources'][2]['url']
+        album_name = response['data']['albumUnion']['name']
 
         
         name = response['data']['albumUnion']['name']
@@ -206,6 +209,7 @@ def get_tracks(playlist_id, offset, limit, token, linkAdd):
             'name': name,
             'artist': artist,
             'song_image': song_image,
+            'album_name': album_name
             }
         )
             
@@ -526,4 +530,14 @@ def main(spotify_url_link=None, is_web_service=False, playlist_name_web=''):
     # download_playlist('7rutb883T7WE7k6qZ1LjwU', "Maya's Party")
 
 if __name__ == "__main__":
+    os.system('cls || clear')
+    os.system('title Spotify2MP3')
+    print(bcolors.OKGREEN + '''
+███████╗██████╗  ██████╗ ████████╗██╗███████╗██╗   ██╗██████╗ ███╗   ███╗██████╗ ██████╗ 
+██╔════╝██╔══██╗██╔═══██╗╚══██╔══╝██║██╔════╝╚██╗ ██╔╝╚════██╗████╗ ████║██╔══██╗╚════██╗
+███████╗██████╔╝██║   ██║   ██║   ██║█████╗   ╚████╔╝  █████╔╝██╔████╔██║██████╔╝ █████╔╝
+╚════██║██╔═══╝ ██║   ██║   ██║   ██║██╔══╝    ╚██╔╝  ██╔═══╝ ██║╚██╔╝██║██╔═══╝  ╚═══██╗
+███████║██║     ╚██████╔╝   ██║   ██║██║        ██║   ███████╗██║ ╚═╝ ██║██║     ██████╔╝
+╚══════╝╚═╝      ╚═════╝    ╚═╝   ╚═╝╚═╝        ╚═╝   ╚══════╝╚═╝     ╚═╝╚═╝     ╚═════╝                                                                            
+''' + bcolors.ENDC)
     main()
