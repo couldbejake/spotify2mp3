@@ -75,6 +75,8 @@ Run the script
 
 `$ python3.8 run.py`
 
+If this project helped you, please give us a star! :)
+
 
 ## Extra configuration
 
