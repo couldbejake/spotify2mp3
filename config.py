@@ -10,6 +10,4 @@ MAX_LENGTH = 60 * 20   # 20 minutes
 FAILURE_THRESHOLD = 100 # The number of songs that need to fail before prompting to re-run
 DEBUG = False
 
-MULTITHREAD = False
-
 PATH_TO_JELLYFIN = ''

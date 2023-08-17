@@ -1,7 +1,5 @@
 <div align="center">
 
-  Please use this <a href="https://github.com/couldbejake/spotify2mp3/tree/97c56424e261d15369bfc0a51de59b31723a135e">this link.</a> We are in the process of re-writing, the current version is non-functional.
-  
   <img src="assets/logo.png" alt="logo" width="200" height="auto" />
   <h1>Spotify2mp3</h1>
   

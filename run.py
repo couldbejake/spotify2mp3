@@ -30,8 +30,6 @@ from eyed3.id3.frames import ImageFrame
 
 from config import *
 
-import threading
-
 ssl._create_default_https_context = ssl._create_stdlib_context
 
 BEARER_TOKEN = ""
@@ -119,135 +117,6 @@ def getActualIdFromEncoded(id):
     return encodedIdBase62
 
 
-def finalize_download(song, skipped_songs, failed_downloads, legal_path_characters, folder_name, spotify_playlist_id):
-    # Sanatizing song name & Artist name for file path output
-    song_name = "".join([current_character for current_character in song["name"] if current_character in legal_path_characters])
-    artist = "".join([current_character for current_character in song['artist'] if current_character in legal_path_characters])
-
-    song_image_url = song['song_image']
-    search_query = song_name + ' ' + artist
-    song_mp3_tmp_loc = "./temp/" + str(search_query) + '.mp3'
-    song_image_path = "./temp/" + str(search_query) + '.jpg'
-    song_final_dest = "downloads/" + str(folder_name) + "/"+ str(search_query) + '.mp3'
-
-    if os.path.exists(song_final_dest):
-        # print(f"{bcolors.WARNING}Song {search_query} already available at {song_final_dest} skipping {bcolors.ENDC}")
-        skipped_songs += 1
-        return -1
-
-    # print('\n' * 3)
-    # print(bcolors.CGREENBG + bcolors.CBLACK + f'Downloading song {index}/ {len(songs)} [ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
-    item_loc = 'downloads/' + str(spotify_playlist_id) +'/'+   ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
-
-    if(os.path.isfile(item_loc)):
-        ''
-        # print(search_query)
-        # print('\nAlready exists! Skipping!\n')
-    else:
-        try:
-            yt_results = YoutubeSearch(search_query, max_results=1).to_json()
-            if len(json.loads(yt_results)['videos']) < 1:
-                raise ConfigException('Skipped song -- Could not load from YouTube')
-            yt_data = json.loads(yt_results)['videos'][0]
-
-            # print('View Count: ' + bcolors.UNDERLINE + yt_data['views'] + bcolors.ENDC)
-            # print('Duration: ' + bcolors.UNDERLINE + yt_data['duration'] + bcolors.ENDC + '\n')
-
-            sd_data = yt_data['duration'].split(':')
-            song_duration = int(sd_data[0]) * 60  + int(sd_data[1])
-
-            viewcount = re.sub('[^0-9]','', yt_data['views'])
-            song_viewcount = int(viewcount) if str(viewcount).isdigit() else 0
-
-            song_link = "https://www.youtube.com" + yt_data['url_suffix']
-            song_albumc_link = yt_data['thumbnails'][0]
-
-            if(song_duration >= MAX_LENGTH):
-                # print(bcolors.CREDBG + bcolors.CBLACK + 'Skipped - Song is longer than set max song length.' + bcolors.ENDC)
-                # print(bcolors.CVIOLETBG2 + bcolors.CBLACK  + 'Change MAX_LENGTH in the script to prevent skipping' + bcolors.ENDC)
-                raise ConfigException('Skipped song due to MAX_LENGTH value in script')
-
-            if(song_viewcount <= MIN_VIEW_COUNT):
-                # print(bcolors.CREDBG + bcolors.CBLACK + 'Skipped - Top song has low view count.' + bcolors.ENDC)
-                # print(bcolors.CVIOLETBG2 + bcolors.CBLACK  + 'Change MIN_VIEW_COUNT in the script to prevent skipping' + bcolors.ENDC)
-                raise ConfigException('Skipped song due to MIN_VIEW_COUNT value in script')
-
-            yt_dl_obj = YouTube(song_link, use_oauth=True, allow_oauth_cache=True)
-            yt_vid_obj = yt_dl_obj.streams.filter(only_audio=True)
-            
-            #select the best audio quality
-            prevKbps = 0
-            correctIndex = 0
-            for i,vid in enumerate(yt_vid_obj):
-                currKbps = int(re.sub("[^0-9]", "", vid.abr))
-                if currKbps>prevKbps:
-                    correctIndex = i
-            
-            yt_vid_obj = yt_vid_obj[correctIndex]
-            
-            yt_tmp_out = yt_vid_obj.download(output_path="./temp/")
-            
-            
-
-            # print(bcolors.OKCYAN + ">   Downloaded mp4 without frames to " + yt_tmp_out + bcolors.ENDC + '\n')
-
-            urllib.request.urlretrieve(song_image_url, song_image_path)
-
-            # print(bcolors.OKCYAN + ">   Downloaded image album cover to " + yt_tmp_out + bcolors.ENDC + '\n')
-
-            # print(bcolors.OKCYAN)
-            clip = AudioFileClip(yt_tmp_out)
-            clip.write_audiofile(song_mp3_tmp_loc)
-            # print(bcolors.ENDC)
-
-            audiofile = eyed3.load(song_mp3_tmp_loc)
-            if (audiofile.tag == None):
-                audiofile.initTag()
-            audiofile.tag.images.set(ImageFrame.FRONT_COVER, open(song_image_path, 'rb').read(), 'image/jpeg')
-            audiofile.tag.album = song['album_name']
-            audiofile.tag.save()
-
-            shutil.copy(song_mp3_tmp_loc, song_final_dest)
-
-            if len(PATH_TO_JELLYFIN) > 0:
-                jfDir = PATH_TO_JELLYFIN + str(folder_name) + "/"+ str(search_query) + '.mp3'
-                shutil.copy(song_mp3_tmp_loc, jfDir)
-
-            # print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
-        except Exception as e:
-            print(e)
-            # TODO: implement other exception
-            if(DEBUG):
-                ''
-                # print(bcolors.FAIL + str(e) + bcolors.ENDC)
-            if(isinstance(e, KeyError)):
-                f = open('failed_log.txt', 'a')
-                f.write(search_query + '\n' + str(e))
-                f.write('\n' + traceback.format_exc() + '\n')
-                f.close()
-                # print(f"{bcolors.WARNING}Failed to convert {search_query} due to error.{bcolors.ENDC}. \nVideo may be age restricted.")
-                failed_downloads += 1
-                failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
-            elif(not isinstance(e, ConfigException)):
-                f = open('failed_log.txt', 'a')
-                f.write(search_query + '\n' + str(e))
-                f.write('\n' + traceback.format_exc() + '\n')
-                f.close()
-                # print(f"{bcolors.WARNING}Failed to convert {search_query} due to error.{bcolors.ENDC}. See failed_log.txt for more information.")
-                failed_downloads += 1
-                failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
-                # print('Please report this at https://github.com/couldbejake/spotify2mp3' + bcolors.ENDC)
-                quit()
-            else:
-                f = open('failed_log.txt', 'a')
-                f.write(search_query + '\n' + str(e))
-                f.write('\n' + traceback.format_exc() + '\n')
-                f.close()
-                # print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}. See failed_log.txt for more information.")
-                failed_downloads += 1
-                failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
-            return -1
-
 
 def get_tracks(playlist_id, offset, limit, token, linkAdd):
     headers = {
@@ -264,7 +133,6 @@ def get_tracks(playlist_id, offset, limit, token, linkAdd):
         link = "https://api-partner.spotify.com/pathfinder/v1/query?operationName=getAlbumMetadata&variables="+encoded
         response =  json.loads(requests.request("GET", link, headers=headers).text)
         song_image = response['data']['albumUnion']['coverArt']['sources'][2]['url']
-        album_name = response['data']['albumUnion']['name']
         
         #song name and artist
         query='{"uri":"spotify:album:' +albumId+ '","offset":0,"limit":300}&extensions={"persistedQuery":{"version":1,"sha256Hash":"f387592b8a1d259b833237a51ed9b23d7d8ac83da78c6f4be3e6a08edef83d5b"}}'
@@ -288,7 +156,6 @@ def get_tracks(playlist_id, offset, limit, token, linkAdd):
                 'name': name,
                 'artist': artist,
                 'song_image': song_image,
-                'album_name': album_name
                 }
             )
             
@@ -325,7 +192,6 @@ def get_tracks(playlist_id, offset, limit, token, linkAdd):
         responseStr =  requests.request("GET", link, headers=headers).text
         response =  json.loads(responseStr)
         song_image = response['data']['albumUnion']['coverArt']['sources'][2]['url']
-        album_name = response['data']['albumUnion']['name']
 
         
         name = response['data']['albumUnion']['name']
@@ -340,7 +206,6 @@ def get_tracks(playlist_id, offset, limit, token, linkAdd):
             'name': name,
             'artist': artist,
             'song_image': song_image,
-            'album_name': album_name
             }
         )
             
@@ -411,23 +276,135 @@ def download_playlist(spotify_playlist_id, folder_name, linkAdd, token=NULL):
     failed_song_names = "" # Stringified list of failed songs in printable format
     skipped_songs = 0 # Counter for songs that are skipped because they already exist
 
-
-    threads = []
-    
     for index, song in enumerate(songs):
 
-        if MULTITHREAD:
-            t = threading.Thread(target=finalize_download, args=(song, skipped_songs, failed_downloads, legal_path_characters, folder_name, spotify_playlist_id))
-            threads.append(t)
-        else:
-            finalize_download(song, skipped_songs, failed_downloads, legal_path_characters, folder_name, spotify_playlist_id)
+        # Sanatizing song name & Artist name for file path output
+        song_name = "".join([current_character for current_character in song["name"] if current_character in legal_path_characters])
+        artist = "".join([current_character for current_character in song['artist'] if current_character in legal_path_characters])
 
-    if MULTITHREAD:
-        for t in threads:
-            t.start()
-            
-        for t in threads:
-            t.join()
+        song_image_url = song['song_image']
+        search_query = song_name + ' ' + artist
+        song_mp3_tmp_loc = "./temp/" + str(search_query) + '.mp3'
+        song_image_path = "./temp/" + str(search_query) + '.jpg'
+        song_final_dest = "downloads/" + str(folder_name) + "/"+ str(search_query) + '.mp3'
+
+        if os.path.exists(song_final_dest):
+            # print(f"{bcolors.WARNING}Song {search_query} already available at {song_final_dest} skipping {bcolors.ENDC}")
+            skipped_songs += 1
+            continue
+
+        # print('\n' * 3)
+        # print(bcolors.CGREENBG + bcolors.CBLACK + f'Downloading song {index}/ {len(songs)} [ ' + str(song_name) + ' - ' + str(artist) + ' ]' + bcolors.ENDC + '\n')
+        item_loc = 'downloads/' + str(spotify_playlist_id) +'/'+   ((search_query + '.mp3').replace('"', '').replace("'", '').replace('\\', '').replace('/', ''))
+
+        if(os.path.isfile(item_loc)):
+            ''
+            # print(search_query)
+            # print('\nAlready exists! Skipping!\n')
+        else:
+            try:
+                yt_results = YoutubeSearch(search_query, max_results=1).to_json()
+                if len(json.loads(yt_results)['videos']) < 1:
+                    raise ConfigException('Skipped song -- Could not load from YouTube')
+                yt_data = json.loads(yt_results)['videos'][0]
+
+                # print('View Count: ' + bcolors.UNDERLINE + yt_data['views'] + bcolors.ENDC)
+                # print('Duration: ' + bcolors.UNDERLINE + yt_data['duration'] + bcolors.ENDC + '\n')
+
+                sd_data = yt_data['duration'].split(':')
+                song_duration = int(sd_data[0]) * 60  + int(sd_data[1])
+
+                viewcount = re.sub('[^0-9]','', yt_data['views'])
+                song_viewcount = int(viewcount) if str(viewcount).isdigit() else 0
+
+                song_link = "https://www.youtube.com" + yt_data['url_suffix']
+                song_albumc_link = yt_data['thumbnails'][0]
+
+                if(song_duration >= MAX_LENGTH):
+                    # print(bcolors.CREDBG + bcolors.CBLACK + 'Skipped - Song is longer than set max song length.' + bcolors.ENDC)
+                    # print(bcolors.CVIOLETBG2 + bcolors.CBLACK  + 'Change MAX_LENGTH in the script to prevent skipping' + bcolors.ENDC)
+                    raise ConfigException('Skipped song due to MAX_LENGTH value in script')
+
+                if(song_viewcount <= MIN_VIEW_COUNT):
+                    # print(bcolors.CREDBG + bcolors.CBLACK + 'Skipped - Top song has low view count.' + bcolors.ENDC)
+                    # print(bcolors.CVIOLETBG2 + bcolors.CBLACK  + 'Change MIN_VIEW_COUNT in the script to prevent skipping' + bcolors.ENDC)
+                    raise ConfigException('Skipped song due to MIN_VIEW_COUNT value in script')
+
+                yt_dl_obj = YouTube(song_link, use_oauth=True, allow_oauth_cache=True)
+                yt_vid_obj = yt_dl_obj.streams.filter(only_audio=True)
+                
+                #select the best audio quality
+                prevKbps = 0
+                correctIndex = 0
+                for i,vid in enumerate(yt_vid_obj):
+                    currKbps = int(re.sub("[^0-9]", "", vid.abr))
+                    if currKbps>prevKbps:
+                        correctIndex = i
+                
+                yt_vid_obj = yt_vid_obj[correctIndex]
+                
+                yt_tmp_out = yt_vid_obj.download(output_path="./temp/")
+                
+                
+
+                # print(bcolors.OKCYAN + ">   Downloaded mp4 without frames to " + yt_tmp_out + bcolors.ENDC + '\n')
+
+                urllib.request.urlretrieve(song_image_url, song_image_path)
+
+                # print(bcolors.OKCYAN + ">   Downloaded image album cover to " + yt_tmp_out + bcolors.ENDC + '\n')
+
+                # print(bcolors.OKCYAN)
+                clip = AudioFileClip(yt_tmp_out)
+                clip.write_audiofile(song_mp3_tmp_loc)
+                # print(bcolors.ENDC)
+
+                audiofile = eyed3.load(song_mp3_tmp_loc)
+                if (audiofile.tag == None):
+                    audiofile.initTag()
+                audiofile.tag.images.set(ImageFrame.FRONT_COVER, open(song_image_path, 'rb').read(), 'image/jpeg')
+                audiofile.tag.album = song['album_name']
+                audiofile.tag.save()
+
+                shutil.copy(song_mp3_tmp_loc, song_final_dest)
+
+                if len(PATH_TO_JELLYFIN) > 0:
+                    jfDir = PATH_TO_JELLYFIN + str(folder_name) + "/"+ str(search_query) + '.mp3'
+                    shutil.copy(song_mp3_tmp_loc, jfDir)
+
+                # print(bcolors.OKGREEN + "Saved final file to " + song_final_dest + bcolors.ENDC + '\n')
+            except Exception as e:
+                print(e)
+                # TODO: implement other exception
+                if(DEBUG):
+                    ''
+                    # print(bcolors.FAIL + str(e) + bcolors.ENDC)
+                if(isinstance(e, KeyError)):
+                    f = open('failed_log.txt', 'a')
+                    f.write(search_query + '\n' + str(e))
+                    f.write('\n' + traceback.format_exc() + '\n')
+                    f.close()
+                    # print(f"{bcolors.WARNING}Failed to convert {search_query} due to error.{bcolors.ENDC}. \nVideo may be age restricted.")
+                    failed_downloads += 1
+                    failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+                elif(not isinstance(e, ConfigException)):
+                    f = open('failed_log.txt', 'a')
+                    f.write(search_query + '\n' + str(e))
+                    f.write('\n' + traceback.format_exc() + '\n')
+                    f.close()
+                    # print(f"{bcolors.WARNING}Failed to convert {search_query} due to error.{bcolors.ENDC}. See failed_log.txt for more information.")
+                    failed_downloads += 1
+                    failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+                    # print('Please report this at https://github.com/couldbejake/spotify2mp3' + bcolors.ENDC)
+                    quit()
+                else:
+                    f = open('failed_log.txt', 'a')
+                    f.write(search_query + '\n' + str(e))
+                    f.write('\n' + traceback.format_exc() + '\n')
+                    f.close()
+                    # print(f"{bcolors.WARNING}Failed to convert {search_query} due to config error.{bcolors.ENDC}. See failed_log.txt for more information.")
+                    failed_downloads += 1
+                    failed_song_names = failed_song_names + "\t• " + song_name + " - " + artist + f" | Fail reason: {e}" + "\n"
+                continue
 
     # print(f"{bcolors.OKGREEN}Successfully downloaded {len(songs) - failed_downloads - skipped_songs}/{len(songs)} songs ({skipped_songs} skipped) to {folder_name}{bcolors.ENDC}\n")
 
@@ -549,14 +526,4 @@ def main(spotify_url_link=None, is_web_service=False, playlist_name_web=''):
     # download_playlist('7rutb883T7WE7k6qZ1LjwU', "Maya's Party")
 
 if __name__ == "__main__":
-    os.system('cls || clear')
-    os.system('title Spotify2MP3')
-    print(bcolors.OKGREEN + '''
-███████╗██████╗  ██████╗ ████████╗██╗███████╗██╗   ██╗██████╗ ███╗   ███╗██████╗ ██████╗ 
-██╔════╝██╔══██╗██╔═══██╗╚══██╔══╝██║██╔════╝╚██╗ ██╔╝╚════██╗████╗ ████║██╔══██╗╚════██╗
-███████╗██████╔╝██║   ██║   ██║   ██║█████╗   ╚████╔╝  █████╔╝██╔████╔██║██████╔╝ █████╔╝
-╚════██║██╔═══╝ ██║   ██║   ██║   ██║██╔══╝    ╚██╔╝  ██╔═══╝ ██║╚██╔╝██║██╔═══╝  ╚═══██╗
-███████║██║     ╚██████╔╝   ██║   ██║██║        ██║   ███████╗██║ ╚═╝ ██║██║     ██████╔╝
-╚══════╝╚═╝      ╚═════╝    ╚═╝   ╚═╝╚═╝        ╚═╝   ╚══════╝╚═╝     ╚═╝╚═╝     ╚═════╝                                                                            
-''' + bcolors.ENDC)
     main()
