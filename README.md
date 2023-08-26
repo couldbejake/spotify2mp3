@@ -37,11 +37,11 @@
 </p>
    
 <h4>
-    <a href="https://github.com/couldbejake/spotify2mp3/wiki">Documentation</a>
-  <span> · </span>
     <a href="https://github.com/couldbejake/spotify2mp3/issues">Report Bug</a>
   <span> · </span>
     <a href="https://github.com/couldbejake/spotify2mp3/issues/new">Request Feature</a>
+  <span> · </span>
+    <a href="https://www.buymeacoffee.com/couldbejake">Support this project</a>
   </h4>
 </div>
 
@@ -51,7 +51,7 @@
 <!-- Prerequisites -->
 ### :bangbang: Prerequisites
 
-Ideally use **Python 3.8.0** but works down to Python 3.1.0
+Ideally use **Python 3.11** but works down to Python 3.8
 
 <!-- Run Locally -->
 ### :running: Run Locally
@@ -67,34 +67,31 @@ Go to the project directory
 
 `$ cd spotify2mp3 `
 
-Install desired packages using PIP 3.8
+Install packages using pip
 
-`$ pip3.8 install -r requirements.txt`
+`$ pip install -r requirements.txt`
 
 Run the script
 
-`$ python3.8 run.py`
+`$ python run.py`
 
-If this project helped you, please give us a star! :)
+Brew yourself a coffee, you deserved it!
 
-
-## Extra configuration
-
-Inside `run.py` you can modify several variables to change how the script operates:
-
-- `MIN_VIEW_COUNT`: The variable that indicates how many views a video has to have before it can be used, defaults to  5000 (meaning songs with less than 5000 views will be ignored and the song will be skipped)
-- `MAX_LENGTH`: The maximum length a song can be and still be downloaded, defaults to  600 seconds or 10 minutes (meaning only songs shorter than 10 mins will be downloaded)
-- `FAILURE_THRESHOLD`: The number of songs that need to fail before prompting to re-run with a lower view count, defaults to 5 (meaning 5 songs or more must fail for user to be prompted)
+`If this project helped you, feel free to give us a star`
 
 ## Getting spotify playlist URL
 
-Paste a Spotify *playlist* URL into the program.
+Paste a Spotify Song, Playlist or Album URL into the program. To get the url:
 
-When prompted for a spotify URL link you will want to go to the [spotify web player](https://open.spotify.com/) and navigate to your playlist. The URL will be in the form `https://open.spotify.com/playlist/<URL Link>` you have two options:
+1. Right click on a Song, Playlist or Album
+2. Share
+3. Copy link
 
-1. Copy-paste the entire URL
-2. Copy **just** the URL link (should just be letters and numbers), and paste that into the prompt
+On mobile:
 
+1. Three dots
+2. Share
+3. Copy link
 
 ## Star History
 
@@ -102,10 +99,12 @@ When prompted for a spotify URL link you will want to go to the [spotify web pla
 
 ## Troubleshooting
 
-If you are attempting to download an album, this will simply not work as this feature simply has not been implemented.
-
-As a temporary solution, load Spotify on your computer, copy all songs from the chosen album into a playlist, and download from there.
+If you have any issues at all, please post a full log <a href="https://github.com/couldbejake/spotify2mp3/issues">here</a>
 
 Support this project
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/couldbejake)
+
+## Coming soon
+
+Documentation for the spotify2mp3 Python API.
