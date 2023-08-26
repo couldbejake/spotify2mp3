@@ -100,8 +100,6 @@ def main(playlist=None, song=None, album=None, quality=None, min_views=None, max
     if disable_threading:
         print(f"{colours.WARNING}Threading is disabled. Downloads may be slower.{colours.ENDC}")
 
-    print("")
-
     downloader = SpotifyDownloader(get_bitrate_from_quality(quality), max_length, min_views)
 
     success = False
@@ -161,8 +159,8 @@ if __name__ == "__main__":
         display_splash()
         choice, url, quality = get_user_input()
         if choice == 'song':
-            main(song=url, quality=quality)
+            main(song=url, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
         elif choice == 'playlist':
-            main(playlist=url, quality=quality)
+            main(playlist=url, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
         else:
-            main(album=url, quality=quality)
+            main(album=url, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
