@@ -73,7 +73,7 @@ Install packages using pip
 
 Run the script
 
-`$ python run.py`
+`$ python spotify2mp3.py`
 
 Brew yourself a coffee, you deserved it!
 
