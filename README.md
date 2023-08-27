@@ -93,10 +93,6 @@ On mobile:
 2. Share
 3. Copy link
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=couldbejake/spotify2mp3&type=Date)](https://github.com/couldbejake/spotify2mp3/)
-
 ## Troubleshooting
 
 If you have any issues at all, please post a full log <a href="https://github.com/couldbejake/spotify2mp3/issues">here</a>
