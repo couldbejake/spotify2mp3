@@ -89,7 +89,7 @@ def main(playlist=None, song=None, album=None, quality=None, min_views=None, max
 
     if quality:
         bitrate = get_bitrate_from_quality(quality)
-        print(f"{colours.OKGREEN}Song quality / bitrate{colours.ENDC}: {quality} / {bitrate} kbps")
+        print(f"{colours.OKGREEN}Song quality / bitrate{colours.ENDC}: {quality} / {bitrate} bps")
 
     if min_views != DEFAULT_MIN_VIEWS_FOR_DOWNLOAD:
         print(f"{colours.OKGREEN}Minimum view count{colours.ENDC}: {min_views}")
