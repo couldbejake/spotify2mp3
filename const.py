@@ -31,3 +31,4 @@ LEGAL_PATH_CHARACTERS = string.ascii_letters + string.digits+ " ()[]" + "_-.,&'!
 DEFAULT_MIN_VIEWS_FOR_DOWNLOAD = 10000
 DEFAULT_MAX_LENGTH_FOR_DOWNLOAD = 60*30
 
+UNKNOWN_ALBUM_COVER_URL = "https://github.com/couldbejake/spotify2mp3/blob/main/assets/unknown-song.png?raw=true"

@@ -118,7 +118,7 @@ class SpotifyPlaylist(Spotify):
 
             self.playlist_metadata = {
                 "title": playlist_data.get("name", ""),
-                "image_url": playlist_data.get("images")[0]["url"],
+                "image_url": playlist_data.get("images", const.UNKNOWN_ALBUM_COVER_URL)[0]["url"],
                 "tracks": tracks,
             }
 
@@ -145,12 +145,14 @@ class SpotifyPlaylist(Spotify):
                 ]
             )
 
+    
+
     def get_cover_art_url(self):
 
         if not self.playlist_metadata:
             self.load_metadata()
 
-        cover_art_url = self.playlist_metadata.get("image_url", "")
+        cover_art_url = self.playlist_metadata.get("image_url", const.UNKNOWN_ALBUM_COVER_URL)
 
         return cover_art_url
 
@@ -197,7 +199,7 @@ class SpotifyAlbum(Spotify):
                 this_track = SpotifyTrack(self.bearer_token, external_urls.get("spotify", ""))
 
                 this_track.load_metadata(track)
-                this_track.update_metadata("image_url", album_data.get("images")[0]["url"])
+                this_track.update_metadata("image_url", album_data.get("images", const.UNKNOWN_ALBUM_COVER_URL)[0]["url"])
 
                 tracks.append(this_track)
 
@@ -206,7 +208,7 @@ class SpotifyAlbum(Spotify):
 
             self.album_metadata = {
                 "title": album_data.get("name", ""),
-                "image_url": album_data.get("images")[0]["url"],
+                "image_url": album_data.get("images", const.UNKNOWN_ALBUM_COVER_URL)[0]["url"],
                 "tracks": tracks,
             }
 
@@ -238,7 +240,7 @@ class SpotifyAlbum(Spotify):
         if not self.album_metadata:
             self.load_metadata()
 
-        cover_art_url = self.album_metadata.get("image_url", "")
+        cover_art_url = self.album_metadata.get("image_url", const.UNKNOWN_ALBUM_COVER_URL)
 
         return cover_art_url
 
@@ -265,9 +267,6 @@ class SpotifyTrack(Spotify):
         self.track_id_match = re.search(r"/track/([a-zA-Z0-9]+)", self.resource_url)
         self.track_metadata = []
 
-    def __mirror__(metadata):
-        super().__init__()
-        pass
 
     def is_valid(self):
         if not self.is_valid_resource(self.resource_url):
@@ -302,7 +301,7 @@ class SpotifyTrack(Spotify):
                     "Duration (ms)": str(track_data.get("duration_ms", "")),
                     "Album Type": album_data.get("album_type", ""),
                 },
-                "image_url": album_images[0].get("url", ""),
+                "image_url": album_images[0].get("url", const.UNKNOWN_ALBUM_COVER_URL),
             }
 
         else:
@@ -366,7 +365,7 @@ class SpotifyTrack(Spotify):
         if not self.track_metadata:
             self.load_metadata()
 
-        cover_art_url = self.track_metadata.get("image_url", "")
+        cover_art_url = self.track_metadata.get("image_url", const.UNKNOWN_ALBUM_COVER_URL)
 
         return cover_art_url
 
