@@ -11,6 +11,7 @@ import string
 import shutil
 
 import os
+import sys
 
 from utils import resave_audio_clip_with_metadata
 
@@ -59,7 +60,9 @@ class SpotifyDownloader():
 
 
         except SpotifyAlbumNotFound as e:
-            print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this album is private or does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
+            print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this album does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
+            sys.exit(1)
+            
             return False
 
     def download_playlist(self, playlist_url):
@@ -102,8 +105,8 @@ class SpotifyDownloader():
             return True
         
         except SpotifyPlaylistNotFound as e:
-
             print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this playlist is private or does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
+            sys.exit(1)
             return False
             
 
