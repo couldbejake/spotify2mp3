@@ -22,7 +22,7 @@ def get_bitrate_from_quality(quality):
     elif quality == "medium":
         return 80000
     elif quality == "high":
-        return 160000
+        return 265000
     else:
         return int(quality)
 
