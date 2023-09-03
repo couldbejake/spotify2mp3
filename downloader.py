@@ -33,6 +33,8 @@ class SpotifyDownloader():
         self.min_view_count = min_view_count
 
     def download_album(self, playlist_url):
+        
+        skipped_songs = 0
 
         try:
 
@@ -49,15 +51,23 @@ class SpotifyDownloader():
                 except SpotifyTrackNotFound as e:
                     
                     print(f"\n{colours.WARNING}[!] Skipped a song we could not find.{colours.ENDC} {e}")
+                    skipped_songs += 1
                 
                 except ConfigVideoMaxLength as e:
                     
                     print(f"\n{colours.WARNING}[!] Skipped a song - The found song was longer than the configured max song length, {colours.ENDC}(use the command line to increase this).{colours.ENDC}\n")
+                    skipped_songs += 1
                 
                 except ConfigVideoLowViewCount as e:
                     
                     print(f"\n{colours.WARNING}[!] Skipped a song - The found song had less views than the minimum view count, {colours.ENDC}(use the command line to increase this).\n")
+                    skipped_songs += 1
 
+            if(skipped_songs > 0):
+
+                print(f"\n{colours.WARNING}[!] Skipped {skipped_songs} songs.{colours.ENDC}\n")
+
+            return True
 
         except SpotifyAlbumNotFound as e:
             print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this album does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
