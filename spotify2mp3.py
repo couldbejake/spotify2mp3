@@ -32,7 +32,7 @@ def validate_quality(quality):
         return quality
     try:
         bitrate = int(quality)
-        if 64 <= bitrate <= 320000:  # Typical YouTube bitrate ranges
+        if 48000 <= bitrate <= 256000:  # Typical YouTube bitrate ranges
             return quality
         else:
             raise argparse.ArgumentTypeError(f"Bitrate outside of typical YouTube range (64 kbps to 320 kbps): {quality}")
