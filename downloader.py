@@ -136,13 +136,13 @@ class SpotifyDownloader():
 
             print(f"{colours.ENDC}   - Downloading the song, please wait{colours.ENDC}")
 
-            video_downloaded_path = self.youtube_client.download(youtube_link, self.audio_quality)
+            video_downloaded_path, self.audio_quality = self.youtube_client.download(youtube_link, self.audio_quality)
 
             # consider updating searchable name to something nicer for the end user
 
             print(f"{colours.ENDC}   - Converting the song and adding metadata{colours.ENDC}")
 
-            resave_audio_clip_with_metadata(video_downloaded_path, track.get_metadata(), output_path + track.get_title(True) + ".mp3")
+            resave_audio_clip_with_metadata(video_downloaded_path, track.get_metadata(), output_path + track.get_title(True) + ".mp3", self.audio_quality)
 
             print(f"{colours.ENDC}   - Done!")
 
