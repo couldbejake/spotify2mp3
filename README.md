@@ -13,10 +13,12 @@
   <a href="https://github.com/couldbejake/spotify2mp3/graphs/contributors">
     <img src="https://img.shields.io/github/contributors/couldbejake/spotify2mp3" alt="contributors" />
   </a>
-  
+
+  <!--
   <a href="">
     <img src="https://img.shields.io/github/last-commit/couldbejake/spotify2mp3" alt="last update" />
   </a>
+  -->
   
   <a href="https://github.com/couldbejake/spotify2mp3/network/members">
     <img src="https://img.shields.io/github/forks/couldbejake/spotify2mp3" alt="forks" />
