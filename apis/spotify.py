@@ -132,7 +132,7 @@ class SpotifyPlaylist(Spotify):
         if not self.playlist_metadata:
             self.load_metadata()
 
-        playlist_title = self.playlist_metadata.get("title", "Unknown Title")
+        playlist_title = self.playlist_metadata.get("title", "Unknown Playlist Name")
 
         if not sanitize:
             return playlist_title
@@ -222,7 +222,7 @@ class SpotifyAlbum(Spotify):
         if not self.album_metadata:
             self.load_metadata()
 
-        album_title = self.album_metadata.get("title", "Unknown Title")
+        album_title = self.album_metadata.get("title", "Unknown Album Name")
 
         if not sanitize:
             return album_title
