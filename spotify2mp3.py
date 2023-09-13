@@ -79,13 +79,13 @@ def main(playlist=None, song=None, album=None, quality=None, min_views=None, max
     print(f"\n{colours.CVIOLETBG2}Chosen Settings{colours.ENDC}\n")
 
     if playlist:
-        print(f"{colours.OKGREEN}Downloading playlist{colours.ENDC}: {playlist}")
+        print(f"{colours.OKGREEN}Playlist{colours.ENDC}: {playlist}")
 
     if song:
-        print(f"{colours.OKGREEN}Downloading song{colours.ENDC}: {song}")
+        print(f"{colours.OKGREEN}Song{colours.ENDC}: {song}")
 
     if album:
-        print(f"{colours.OKGREEN}Downloading album{colours.ENDC}: {album}")
+        print(f"{colours.OKGREEN}Album{colours.ENDC}: {album}")
 
     if quality:
         bitrate = get_bitrate_from_quality(quality)
