@@ -31,7 +31,7 @@ class SpotifyDownloader():
 
     def download_album(self, playlist_url):
 
-        print(f"\n{colours.OKBLUE}[!] Retrieving spotify album.")
+        print(f"\n{colours.OKBLUE}[!] Retrieving spotify album")
 
         try:
 
@@ -56,7 +56,7 @@ class SpotifyDownloader():
         
     def download_playlist(self, playlist_url):
 
-        print(f"\n{colours.OKBLUE}[!] Retrieving spotify playlist.")
+        print(f"\n{colours.OKBLUE}[!] Retrieving spotify playlist (large playlists will take time)")
 
         try:
             playlist = self.spotify_client.playlist(playlist_url)
