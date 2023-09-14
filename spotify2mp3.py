@@ -134,7 +134,7 @@ if __name__ == "__main__":
         group.add_argument("-p", "--playlist", "--list", help="Specify a playlist URL or ID to download", type=str)
         group.add_argument("-s", "--song", "--single", "-t", "--track", help="Specify a song URL or ID to download", type=str)
         group.add_argument("-a", "--album", help="Specify an album URL or ID to download", type=str)
-        parser.add_argument("-l", "--liked", help="Retrieves user's liked songs", action="store_true")
+        group.add_argument("-l", "--liked", help="Retrieves user's liked songs", action="store_true")
 
         parser.add_argument("-q", "--quality", help="Specify the song download quality or bitrate", type=validate_quality, default="high")
         parser.add_argument("--min-views", help="Minimum view count on YouTube", type=int, default=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD)
@@ -161,7 +161,7 @@ if __name__ == "__main__":
             parser.print_help()
             sys.exit(1)
 
-        main(playlist=args.playlist, song=args.song, album=args.album, quality=args.quality, min_views=args.min_views, max_length=args.max_length, disable_threading=args.disable_threading)
+        main(playlist=args.playlist, song=args.song, album=args.album, liked=args.liked, quality=args.quality, min_views=args.min_views, max_length=args.max_length, disable_threading=args.disable_threading)
 
     else:  # If no command-line arguments are provided, use wizard mode.
         display_splash()

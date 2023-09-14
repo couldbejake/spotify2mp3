@@ -64,9 +64,11 @@ class Spotify:
 class SpotifyPlaylist(Spotify):
     def __init__(self, resource_url):
         super().__init__()
-        self.resource_url = resource_url
-        self.resource_id_match = re.search(r"/playlist/([a-zA-Z0-9]+)", self.resource_url)
-        self.resource_id = self.resource_id_match.group(1)
+        # Optional due to SpotifyLikedSongs extending this
+        if resource_url is not None:
+            self.resource_url = resource_url
+            self.resource_id_match = re.search(r"/playlist/([a-zA-Z0-9]+)", self.resource_url)
+            self.resource_id = self.resource_id_match.group(1)
         self.playlist_metadata = []
 
     def load(self):
@@ -324,7 +326,7 @@ class SpotifyTrack(Spotify):
 
 class SpotifyLikedSongs(SpotifyPlaylist):
     def __init__(self):
-        super().__init__()
+        super().__init__(None)
         self.playlist_metadata = []
 
     def load(self):
@@ -332,7 +334,7 @@ class SpotifyLikedSongs(SpotifyPlaylist):
         try:
             playlist = self.tekore_spotify.saved_tracks('from_token', limit=50)
             # handles spotify API paging internally
-            playlist_tracks = self.tekore_spotify.all_items(playlist.tracks)
+            playlist_tracks = self.tekore_spotify.all_items(playlist)
             tracks = []
 
             for model in playlist_tracks:
