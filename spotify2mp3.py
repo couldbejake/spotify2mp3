@@ -116,7 +116,7 @@ def main(playlist=None, song=None, album=None, liked=False, quality=None, min_vi
     elif(album):
         success = downloader.download_album(album)
     elif(liked):
-        success = downloader.download_liked_songs()  
+        success = downloader.download_liked_songs()
 
     downloader.rm_tmp_folder()
 

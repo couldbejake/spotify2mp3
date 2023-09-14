@@ -13,7 +13,7 @@ def get_stored_creds():
     if refreshToken is None or refreshToken == '':
         raise ValueError('RefreshToken not available in tekore_cfg.ini. Run login.py first.')
     userToken = cred.refresh_user_token(refreshToken)
-    
+
 def get_album(album_id):
     # Return early if no login
     if userToken is None:
@@ -76,8 +76,6 @@ def get_liked_playlist():
         return "Error in retrieving playlist!", 400
 
 def main():
-    global userToken
-
     get_stored_creds()
     
     # Supposedly this doesn't happen

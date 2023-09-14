@@ -8,7 +8,6 @@ import os
 import shutil
 import time
 import string
-from apis.spotify import Spotify
 from apis.youtube import YouTube
 
 from pathlib import Path

@@ -1,11 +1,14 @@
 import os
 import tekore as tk
 from flask import Flask, request, redirect
-import threading, webbrowser
+import threading
+import webbrowser
+import uuid
 
 spotify = tk.Spotify()
 
-userToken = None # User token
+userToken = None  # User token
+cred = None  # credentials object for doing token ops
 auths = {}  # Auth attempts. Stores data across spotify login
 
 cfg_filename = 'tekore_cfg.ini'
@@ -35,21 +38,26 @@ To access spotify, you need to create a developer 'application' associated with 
 login_prompt = 'Grant permission to access spotify by clicking <a href="/login">here</a> or click <a href="/logout">here</a> to start over.'
 complete_prompt = '<br><br>You may now close this screen. Or click <a href="/logout">here</a> to start over'
 
+
 def does_config_exist():
     return os.path.exists(cfg_filename)
 
+
 def get_stored_creds():
-    global userToken, spotifyClientId, spotifyClientSecret, spotifyReturnUri, refreshToken, cred
-    (spotifyClientId, spotifyClientSecret, spotifyReturnUri, refreshToken) = tk.config_from_file('tekore_cfg.ini', return_refresh=True)
-    cred = tk.Credentials(spotifyClientId, spotifyClientSecret, spotifyReturnUri)
+    global userToken, cred
+    (spotifyClientId, spotifyClientSecret, spotifyReturnUri,
+     refreshToken) = tk.config_from_file('tekore_cfg.ini', return_refresh=True)
+    cred = tk.Credentials(
+        spotifyClientId, spotifyClientSecret, spotifyReturnUri)
 
     # Refresh token available
     if refreshToken is not None and refreshToken != '':
         userToken = cred.refresh_user_token(refreshToken)
 
+
 def app_factory() -> Flask:
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'aliens'
+    app.config['SECRET_KEY'] = uuid.uuid4()
 
     @app.route('/', methods=['GET'])
     def main():
@@ -80,24 +88,24 @@ def app_factory() -> Flask:
             page = '<br>Error retrieving user information!'
 
         return page + complete_prompt
-    
+
     @app.route('/submit_creds', methods=['GET'])
     def submit_creds():
         args = request.args
         if len(args) == 0 or args['cid'] == '' or args['csec'] == '':
             return 'Invalid information entered. Click <a href="/">here</a> to try again.'
-        
+
         # Store clientId, clientSecret, and redirectUri
         new_conf = (args['cid'], args['csec'], login_redirect_url, None)
         tk.config_to_file(cfg_filename, new_conf)
 
         # Retrieve those creds
         get_stored_creds()
-        
+
         return redirect('/login', 307)
 
     @app.route('/login', methods=['GET'])
-    def login():            
+    def login():
         scope = tk.scope.every
         auth = tk.UserAuth(cred, scope)
         auths[auth.state] = auth
@@ -114,7 +122,7 @@ def app_factory() -> Flask:
         userToken = None
 
         return redirect('/', 307)
-    
+
     @app.route('/callback', methods=['GET'])
     def login_callback():
         global userToken
@@ -130,14 +138,14 @@ def app_factory() -> Flask:
 
         # Store refresh token
         new_conf = (None, None, None, userToken.refresh_token)
-        tk.config_to_file(cfg_filename, new_conf)    
+        tk.config_to_file(cfg_filename, new_conf)
 
         return redirect('/', 307)
-    
+
     return app
 
 
 if __name__ == '__main__':
     application = app_factory()
-    threading.Timer(1.25, lambda: webbrowser.open(app_url) ).start()
+    threading.Timer(1.25, lambda: webbrowser.open(app_url)).start()
     application.run(app_host, app_port)
