@@ -345,9 +345,10 @@ class SpotifyLikedSongs(SpotifyPlaylist):
                 tracks.append(this_track)
 
             if playlist:
+                images = self.tekore_spotify.current_user().images
                 self.playlist_metadata = {
-                    "title": playlist.name,
-                    "image_url": playlist.images[0].url if len(playlist.images) > 0 else const.UNKNOWN_ALBUM_COVER_URL,
+                    "title": "Liked Songs",
+                    "image_url": images[0].url if len(images) > 0 else const.UNKNOWN_ALBUM_COVER_URL,
                     "tracks": tracks,
                 }
             else:
