@@ -51,6 +51,8 @@ def validate_spotify_url(url):
         return 'playlist'
     elif re.match(album_pattern, url):
         return 'album'
+    elif url == 'liked':
+        return url
     else:
         print("")
         raise ValueError(f"Invalid Spotify URL: {url}\n")
@@ -74,10 +76,10 @@ def get_user_input():
 
     return choice, url, quality
 
-def main(playlist=None, song=None, album=None, quality=None, min_views=None, max_length=None, disable_threading=False):
+def main(playlist=None, song=None, album=None, liked=False, quality=None, min_views=None, max_length=None, disable_threading=False):
 
     print(f"\n{colours.CVIOLETBG2}Chosen Settings{colours.ENDC}\n")
-
+    
     if playlist:
         print(f"{colours.OKGREEN}Playlist{colours.ENDC}: {playlist}")
 
@@ -87,6 +89,9 @@ def main(playlist=None, song=None, album=None, quality=None, min_views=None, max
     if album:
         print(f"{colours.OKGREEN}Album{colours.ENDC}: {album}")
 
+    if liked:
+        print(f"{colours.OKGREEN}Liked Songs{colours.ENDC}")
+    
     if quality:
         bitrate = get_bitrate_from_quality(quality)
         print(f"{colours.OKGREEN}Song quality / bitrate{colours.ENDC}: {quality} / {bitrate} bps")
@@ -105,11 +110,13 @@ def main(playlist=None, song=None, album=None, quality=None, min_views=None, max
     success = False
 
     if(song):
-        success =downloader.download_track(song)
+        success = downloader.download_track(song)
     elif(playlist):
-        success =downloader.download_playlist(playlist)  
+        success = downloader.download_playlist(playlist)  
     elif(album):
-        success =downloader.download_album(album)
+        success = downloader.download_album(album)
+    elif(liked):
+        success = downloader.download_liked_songs()  
 
     downloader.rm_tmp_folder()
 
@@ -125,8 +132,9 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser(description="spotify2mp3: Download songs from Spotify by searching them on YouTube and converting the audio.")
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument("-p", "--playlist", "--list", help="Specify a playlist URL or ID to download", type=str)
-        group.add_argument("-s", "--song", "--single", help="Specify a song URL or ID to download", type=str)
+        group.add_argument("-s", "--song", "--single", "-t", "--track", help="Specify a song URL or ID to download", type=str)
         group.add_argument("-a", "--album", help="Specify an album URL or ID to download", type=str)
+        parser.add_argument("-l", "--liked", help="Retrieves user's liked songs", action="store_true")
 
         parser.add_argument("-q", "--quality", help="Specify the song download quality or bitrate", type=validate_quality, default="high")
         parser.add_argument("--min-views", help="Minimum view count on YouTube", type=int, default=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD)
@@ -148,8 +156,8 @@ if __name__ == "__main__":
             print(f"{colours.FAIL}Error: {e}{colours.ENDC}")
             sys.exit(1)
 
-        if not (args.song or args.playlist or args.album):
-            print(f"{colours.FAIL}Error: You must specify a song, playlist, or album to download.{colours.ENDC}")
+        if not (args.song or args.playlist or args.album or args.liked):
+            print(f"{colours.FAIL}Error: You must specify a song, playlist, album, or 'liked' to download.{colours.ENDC}")
             parser.print_help()
             sys.exit(1)
 
@@ -162,5 +170,7 @@ if __name__ == "__main__":
             main(song=url, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
         elif choice == 'playlist':
             main(playlist=url, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
-        else:
+        elif choice == 'album':
             main(album=url, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
+        else 
+            main(liked=True, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)

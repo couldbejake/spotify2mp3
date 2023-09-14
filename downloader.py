@@ -53,6 +53,30 @@ class SpotifyDownloader():
             print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this album does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
             sys.exit(1)
             return False
+    
+    def download_liked_songs(self):
+
+        print(f"\n{colours.OKBLUE}[!] Retrieving spotify liked songs (many songs will take time)")
+
+        try:
+            playlist = self.spotify_client.likedSongs()
+
+            self.prep_folder("downloads/liked/" + playlist.get_title(True))
+
+            tracks = playlist.get_tracks()
+
+            print(f"\n{colours.OKBLUE}[!] Found {len(tracks)} liked tracks.")
+            time.sleep(3)
+
+            output_path = "downloads/liked/" + playlist.get_title(True) + "/"
+            skipped_tracks = self.download_tracks(output_path, tracks)
+
+            return True
+       
+        except SpotifyPlaylistNotFound as e:
+            print(f"\n{colours.FAIL}Error: {colours.ENDC} (e: {e}).{colours.ENDC}\n")
+            sys.exit(1)
+            return False
         
     def download_playlist(self, playlist_url):
 
