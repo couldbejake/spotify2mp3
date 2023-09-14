@@ -106,11 +106,12 @@ class SpotifyDownloader():
 
         skipped_tracks = []
 
-        for track in tracks:
+        idx_max = len(tracks)
+        for i in range(idx_max):
             
             try:
-
-                self.download_track(None, track, output_path, True)
+                track = tracks[i]
+                self.download_track(None, track, i, idx_max, output_path, True)
 
             except SpotifyTrackNotFound as e:
                 
@@ -151,7 +152,7 @@ class SpotifyDownloader():
 
         return skipped_tracks
 
-    def download_track(self, track_url = None, track = None, output_path = None, as_sub_function = False):
+    def download_track(self, track_url = None, track = None, idx = 0, idx_max = 0, output_path = None, as_sub_function = False):
 
         try:
 
@@ -165,7 +166,7 @@ class SpotifyDownloader():
                     raise Exception("No Track was supplied to download track!")
                 
             if(track):
-                print(f"\n{colours.OKGREEN}Searching for song{colours.ENDC}: {track.get_title(True)} by {track.get_artist()}")
+                print(f"\n{colours.OKGREEN}Searching for song [{idx}/{idx_max}] {colours.ENDC}: {track.get_title(True)} by {track.get_artist()}")
             
             track_path = output_path + track.get_title(True) + ".mp3"
 
