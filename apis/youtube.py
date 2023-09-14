@@ -36,7 +36,7 @@ class YouTube:
         return youtube_video_link
     
     def download(self, url, audio_bitrate):
-        youtube_video = pytubeYouTube(url, use_oauth=True, allow_oauth_cache=True)
+        youtube_video = pytubeYouTube(url)
         if youtube_video.age_restricted:
             youtube_video.bypass_age_gate()
         youtube_video_streams = youtube_video.streams.filter(only_audio=True, file_extension='mp4')
