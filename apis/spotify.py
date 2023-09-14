@@ -1,3 +1,4 @@
+from exceptions import InvalidSpotifyURL, SpotifyAlbumNotFound, SpotifyTrackNotFound, SpotifyPlaylistNotFound, SpotifyRetrievalError
 import re
 import os
 import sys
@@ -9,8 +10,6 @@ import const
 # Add the parent directory to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from exceptions import InvalidSpotifyURL, SpotifyAlbumNotFound, SpotifyTrackNotFound, SpotifyPlaylistNotFound, SpotifyRetrievalError
-
 
 class Spotify:
 
@@ -18,26 +17,31 @@ class Spotify:
         user_token = self.get_stored_token()
 
         if user_token is None:
-            raise ValueError('Error retrieving access token for user refresh token. Run login.py again')
-        
+            raise ValueError(
+                'Error retrieving access token for user refresh token. Run login.py again')
+
         self.tekore_spotify = tk.Spotify(user_token)
 
     def get_stored_token(self):
-        (spotifyClientId, spotifyClientSecret, spotifyReturnUri, refreshToken) = tk.config_from_file('tekore_cfg.ini', return_refresh=True)
-        cred = tk.Credentials(spotifyClientId, spotifyClientSecret, spotifyReturnUri)
+        (spotifyClientId, spotifyClientSecret, spotifyReturnUri,
+         refreshToken) = tk.config_from_file('tekore_cfg.ini', return_refresh=True)
+        cred = tk.Credentials(
+            spotifyClientId, spotifyClientSecret, spotifyReturnUri)
 
         # Refresh token available
         if refreshToken is None or refreshToken == '':
-            raise ValueError('RefreshToken not available in tekore_cfg.ini. Run login.py first.')
-        
+            raise ValueError(
+                'RefreshToken not available in tekore_cfg.ini. Run login.py first.')
+
         return cred.refresh_user_token(refreshToken)
-    
+
     def likedSongs(self):
         return SpotifyLikedSongs()
-    
+
     def playlist(self, playlist_url):
         if not re.match(r"https://open\.spotify\.com/playlist/[A-Za-z0-9?=\-]+", playlist_url):
-            raise InvalidSpotifyURL(f"Invalid Spotify Playlist URL: {playlist_url}")
+            raise InvalidSpotifyURL(
+                f"Invalid Spotify Playlist URL: {playlist_url}")
         return SpotifyPlaylist(playlist_url)
 
     def track(self, track_url):
@@ -49,15 +53,15 @@ class Spotify:
         if not re.match(r"https://open\.spotify\.com/album/[A-Za-z0-9?=\-]+", album_url):
             raise InvalidSpotifyURL(f"Invalid Spotify Album URL: {album_url}")
         return SpotifyAlbum(album_url)
-    
+
     # 'virtual' methods
-    def load():
+    def load(self):
         pass
 
-    def get_title(sanitize=False):
+    def get_title(self, sanitize=False):
         pass
 
-    def get_cover_art_url():
+    def get_cover_art_url(self):
         pass
 
 
@@ -67,14 +71,16 @@ class SpotifyPlaylist(Spotify):
         # Optional due to SpotifyLikedSongs extending this
         if resource_url is not None:
             self.resource_url = resource_url
-            self.resource_id_match = re.search(r"/playlist/([a-zA-Z0-9]+)", self.resource_url)
+            self.resource_id_match = re.search(
+                r"/playlist/([a-zA-Z0-9]+)", self.resource_url)
             self.resource_id = self.resource_id_match.group(1)
         self.playlist_metadata = []
 
     def load(self):
-        
+
         try:
-            playlist = self.tekore_spotify.playlist(self.resource_id, market='from_token')
+            playlist = self.tekore_spotify.playlist(
+                self.resource_id, market='from_token')
             # handles spotify API paging internally
             playlist_tracks = self.tekore_spotify.all_items(playlist.tracks)
             tracks = []
@@ -93,8 +99,9 @@ class SpotifyPlaylist(Spotify):
                     "tracks": tracks,
                 }
             else:
-                raise SpotifyPlaylistNotFound("Failed to fetch playlist data from Spotify API.")
-            
+                raise SpotifyPlaylistNotFound(
+                    "Failed to fetch playlist data from Spotify API.")
+
         except tk.HTTPError:
             raise SpotifyRetrievalError("Error in retrieving playlist!")
 
@@ -103,7 +110,8 @@ class SpotifyPlaylist(Spotify):
         if not self.playlist_metadata:
             self.load()
 
-        playlist_title = self.playlist_metadata.get("title", "Unknown Playlist Name")
+        playlist_title = self.playlist_metadata.get(
+            "title", "Unknown Playlist Name")
 
         if not sanitize:
             return playlist_title
@@ -114,14 +122,15 @@ class SpotifyPlaylist(Spotify):
                     for current_character in playlist_title
                     if current_character in const.LEGAL_PATH_CHARACTERS
                 ]
-            )    
+            )
 
     def get_cover_art_url(self):
 
         if not self.playlist_metadata:
             self.load()
 
-        cover_art_url = self.playlist_metadata.get("image_url", const.UNKNOWN_ALBUM_COVER_URL)
+        cover_art_url = self.playlist_metadata.get(
+            "image_url", const.UNKNOWN_ALBUM_COVER_URL)
 
         return cover_art_url
 
@@ -139,18 +148,21 @@ class SpotifyPlaylist(Spotify):
 
         return self.playlist_metadata
 
+
 class SpotifyAlbum(Spotify):
     def __init__(self, resource_url):
         super().__init__()
         self.resource_url = resource_url
-        self.resource_id_match = re.search(r"/album/([a-zA-Z0-9]+)", self.resource_url)
+        self.resource_id_match = re.search(
+            r"/album/([a-zA-Z0-9]+)", self.resource_url)
         self.resource_id = self.resource_id_match.group(1)
         self.album_metadata = []
 
     def load(self):
 
         try:
-            album = self.tekore_spotify.album(self.resource_id, market='from_token')
+            album = self.tekore_spotify.album(
+                self.resource_id, market='from_token')
             # handles spotify API paging internally
             album_tracks = self.tekore_spotify.all_items(album.tracks)
             tracks = []
@@ -169,8 +181,9 @@ class SpotifyAlbum(Spotify):
                     "tracks": tracks,
                 }
             else:
-                raise SpotifyAlbumNotFound("Failed to fetch album data from Spotify API.")
-            
+                raise SpotifyAlbumNotFound(
+                    "Failed to fetch album data from Spotify API.")
+
         except tk.HTTPError:
             raise SpotifyRetrievalError("Error in retrieving album!")
 
@@ -212,21 +225,24 @@ class SpotifyAlbum(Spotify):
             self.load_metadata()
 
         return self.album_metadata
-    
+
+
 class SpotifyTrack(Spotify):
     def __init__(self, resource_url):
         super().__init__()
         self.resource_url = resource_url
-        self.resource_id_match = re.search(r"/track/([a-zA-Z0-9]+)", self.resource_url)
+        self.resource_id_match = re.search(
+            r"/track/([a-zA-Z0-9]+)", self.resource_url)
         self.resource_id = self.resource_id_match.group(1)
         self.track_metadata = []
 
     def load(self, track_data=None):
 
         if track_data == None:
-            
+
             try:
-                track_data = self.tekore_spotify.track(self.resource_id, market='from_token')                
+                track_data = self.tekore_spotify.track(
+                    self.resource_id, market='from_token')
             except tk.HTTPError:
                 raise SpotifyRetrievalError("Error in retrieving track!")
 
@@ -256,7 +272,8 @@ class SpotifyTrack(Spotify):
             }
 
         else:
-            raise SpotifyTrackNotFound("Failed to fetch track data from Spotify API.")
+            raise SpotifyTrackNotFound(
+                "Failed to fetch track data from Spotify API.")
 
     def get_title(self, sanitize=False):
 
@@ -275,17 +292,18 @@ class SpotifyTrack(Spotify):
                     if current_character in const.LEGAL_PATH_CHARACTERS
                 ]
             )
-    
+
     def get_artist(self, sanitize=False):
 
         if not self.track_metadata:
             self.load()
 
-        artist_name = " ".join(self.track_metadata.get("artist", "Unknown artist"))
+        artist_name = " ".join(
+            self.track_metadata.get("artist", "Unknown artist"))
 
         if not sanitize:
             return artist_name
-        
+
         else:
             return "".join(
                 [
@@ -313,7 +331,8 @@ class SpotifyTrack(Spotify):
         if not self.track_metadata:
             self.load()
 
-        cover_art_url = self.track_metadata.get("image_url", const.UNKNOWN_ALBUM_COVER_URL)
+        cover_art_url = self.track_metadata.get(
+            "image_url", const.UNKNOWN_ALBUM_COVER_URL)
 
         return cover_art_url
 
@@ -324,13 +343,14 @@ class SpotifyTrack(Spotify):
 
         return self.track_metadata
 
+
 class SpotifyLikedSongs(SpotifyPlaylist):
     def __init__(self):
         super().__init__(None)
         self.playlist_metadata = []
 
     def load(self):
-        
+
         try:
             playlist = self.tekore_spotify.saved_tracks('from_token', limit=50)
             # handles spotify API paging internally
@@ -352,8 +372,9 @@ class SpotifyLikedSongs(SpotifyPlaylist):
                     "tracks": tracks,
                 }
             else:
-                raise SpotifyPlaylistNotFound("Failed to fetch playlist data from Spotify API.")
-        
+                raise SpotifyPlaylistNotFound(
+                    "Failed to fetch playlist data from Spotify API.")
+
         except tk.HTTPError:
             raise SpotifyRetrievalError("Error in retrieving playlist!")
 

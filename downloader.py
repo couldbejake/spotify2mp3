@@ -45,7 +45,7 @@ class SpotifyDownloader():
             time.sleep(3)
 
             output_path = "downloads/albums/" + album.get_title(True) + "/"
-            skipped_tracks = self.download_tracks(output_path, tracks)
+            self.download_tracks(output_path, tracks)
 
             return True
         
@@ -69,7 +69,7 @@ class SpotifyDownloader():
             time.sleep(3)
 
             output_path = "downloads/liked/" + playlist.get_title(True) + "/"
-            skipped_tracks = self.download_tracks(output_path, tracks)
+            self.download_tracks(output_path, tracks)
 
             return True
        
@@ -93,7 +93,7 @@ class SpotifyDownloader():
             time.sleep(3)
 
             output_path = "downloads/playlists/" + playlist.get_title(True) + "/"
-            skipped_tracks = self.download_tracks(output_path, tracks)
+            self.download_tracks(output_path, tracks)
 
             return True
         

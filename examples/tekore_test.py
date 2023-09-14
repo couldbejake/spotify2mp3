@@ -5,7 +5,7 @@ spotify = tk.Spotify()
 userToken = None # User token
 
 def get_stored_creds():
-    global userToken, spotifyClientId, spotifyClientSecret, spotifyReturnUri, refreshToken, cred
+    global userToken
     (spotifyClientId, spotifyClientSecret, spotifyReturnUri, refreshToken) = tk.config_from_file('tekore_cfg.ini', return_refresh=True)
     cred = tk.Credentials(spotifyClientId, spotifyClientSecret, spotifyReturnUri)
 
@@ -15,8 +15,6 @@ def get_stored_creds():
     userToken = cred.refresh_user_token(refreshToken)
     
 def get_album(album_id):
-    global userToken
-
     # Return early if no login
     if userToken is None:
         raise RuntimeError("Not logged in. Run login.py first")
@@ -36,8 +34,6 @@ def get_album(album_id):
         return "Error in retrieving album!", 400
     
 def get_playlist(playlist_id):
-    global userToken
-
     # Return early if no login
     if userToken is None:
         raise RuntimeError("Not logged in. Run login.py first")
@@ -59,8 +55,6 @@ def get_playlist(playlist_id):
         return "Error in retrieving playlist!", 400
         
 def get_liked_playlist():
-    global userToken
-
     # Return early if no login
     if userToken is None:
         raise RuntimeError("Not logged in. Run login.py first")
