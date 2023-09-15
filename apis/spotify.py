@@ -53,7 +53,7 @@ class Spotify:
         if response.status_code == 200:
             return response.json()
         else:
-            #print(f"Request to {self.base_url + endpoint} failed with status code {response.status_code}")
+            print(f"Request to {self.base_url + endpoint} failed with status code {response.status_code}")
             return None
 
     def is_valid_resource(self, resource_url):
