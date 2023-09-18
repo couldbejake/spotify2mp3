@@ -1,7 +1,7 @@
 from const import colours
 from pytube.exceptions import AgeRestrictedError
 from exceptions import InvalidSpotifyURL, SpotifyAlbumNotFound, SpotifyTrackNotFound, SpotifyPlaylistNotFound, ConfigVideoMaxLength, ConfigVideoLowViewCount
-from apis.spotify import Spotify, SpotifyPlaylist, SpotifyTrack, SpotifyAlbum
+from apis.spotify import Spotify
 from utils import resave_audio_clip_with_metadata
 import sys
 import os
@@ -17,13 +17,10 @@ import ssl
 ssl._create_default_https_context = ssl._create_stdlib_context
 
 
-# add logging for number of songs skipped
-
-
 class SpotifyDownloader():
-    def __init__(self, audio_quality=1000000, max_length=60*30, min_view_count=10000):
-        self.spotify_client = Spotify()
-        self.youtube_client = YouTube()
+    def __init__(self, spotify: Spotify, youtube: YouTube, audio_quality=1000000, max_length=60*30, min_view_count=10000):
+        self.spotify_client = spotify
+        self.youtube_client = youtube
         self.audio_quality = audio_quality
         self.max_length = max_length
         self.min_view_count = min_view_count
@@ -51,23 +48,22 @@ class SpotifyDownloader():
         except SpotifyAlbumNotFound as e:
             print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this album does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
             sys.exit(1)
-            return False
     
     def download_liked_songs(self):
 
-        print(f"\n{colours.OKBLUE}[!] Retrieving spotify liked songs (many songs will take time)")
+        print(f"\n{colours.OKBLUE}[!] Retrieving liked songs from Spotify (many songs will take time)")
 
         try:
-            playlist = self.spotify_client.likedSongs()
+            likedplaylist = self.spotify_client.likedSongs()
 
-            self.prep_folder("downloads/liked/" + playlist.get_title(True))
+            self.prep_folder("downloads/liked/" + likedplaylist.get_title(True))
 
-            tracks = playlist.get_tracks()
+            tracks = likedplaylist.get_tracks()
 
             print(f"\n{colours.OKBLUE}[!] Found {len(tracks)} liked tracks.")
             time.sleep(3)
 
-            output_path = "downloads/liked/" + playlist.get_title(True) + "/"
+            output_path = "downloads/liked/" + likedplaylist.get_title(True) + "/"
             self.download_tracks(output_path, tracks)
 
             return True
@@ -75,7 +71,6 @@ class SpotifyDownloader():
         except SpotifyPlaylistNotFound as e:
             print(f"\n{colours.FAIL}Error: {colours.ENDC} (e: {e}).{colours.ENDC}\n")
             sys.exit(1)
-            return False
         
     def download_playlist(self, playlist_url):
 
@@ -165,7 +160,7 @@ class SpotifyDownloader():
                     raise Exception("No Track was supplied to download track!")
                 
             if(track):
-                print(f"\n{colours.OKGREEN}Searching for song [{idx}/{idx_max}] {colours.ENDC}: {track.get_title(True)} by {track.get_artist()}")
+                print(f"\n{colours.OKGREEN}Searching for song [{idx+1}/{idx_max+1}] {colours.ENDC}: {track.get_title(True)} by {track.get_artist()}")
             
             track_path = output_path + track.get_title(True) + ".mp3"
 

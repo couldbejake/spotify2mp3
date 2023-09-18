@@ -1,3 +1,4 @@
+from enum import Enum
 import sys
 import string
 
@@ -7,6 +8,9 @@ def supports_24bit_color():
         return os.getenv("COLORTERM") == "truecolor"
     return False
 
+class SpotifyAuthType(str, Enum):
+    USER = 'user'
+    ANONYMOUS = 'anonymous'
 
 class colours:
     HEADER = '\033[95m'
@@ -25,6 +29,8 @@ class colours:
     SPOTIFYGREEN = '\033[38;2;30;215;96m' if supports_24bit_color() else '\033[92m'
 
 
+LIKED_KEYWORD = "liked"
+
 BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 LEGAL_PATH_CHARACTERS = string.ascii_letters + string.digits+ " ()[]" + "_-.,&'!@#$%^&+=~`"
 
@@ -32,3 +38,4 @@ DEFAULT_MIN_VIEWS_FOR_DOWNLOAD = 10000
 DEFAULT_MAX_LENGTH_FOR_DOWNLOAD = 60*30
 
 UNKNOWN_ALBUM_COVER_URL = "https://github.com/couldbejake/spotify2mp3/blob/main/assets/unknown-song.png?raw=true"
+HELP_URL = "https://github.com/couldbejake/spotify2mp3/issues"
