@@ -180,7 +180,7 @@ class SpotifyDownloader():
 
             youtube_link = self.youtube_client.search( searchable_name, self.max_length, self.min_view_count )
 
-            print(f"{colours.ENDC}   - Downloading {youtube_link}, please wait{colours.ENDC}")
+            print(f"{colours.ENDC}   - Downloading, please wait{colours.ENDC}")
 
             video_downloaded_path = self.youtube_client.download(youtube_link, self.audio_quality)
 
