@@ -55,7 +55,7 @@ class SpotifyPlaylist():
         self.resource_id_match = re.search(
             r"/playlist/([a-zA-Z0-9]+)", self.resource_url)
         self.resource_id = self.resource_id_match.group(1)
-        self.playlist_metadata = []
+        self.playlist_metadata = {}
 
     def load(self):
 
@@ -140,7 +140,7 @@ class SpotifyAlbum():
         self.resource_id_match = re.search(
             r"/album/([a-zA-Z0-9]+)", self.resource_url)
         self.resource_id = self.resource_id_match.group(1)
-        self.album_metadata = []
+        self.album_metadata = {}
 
     def load(self):
 
@@ -151,14 +151,14 @@ class SpotifyAlbum():
             tracks = []
 
             for model in album_tracks:
-                external_urls = model.track.external_urls
+                external_urls = model.external_urls
 
                 this_track = SpotifyTrack(self.base, external_urls.get("spotify", ""))
-                this_track.load(model.track)
+                this_track.load()
                 tracks.append(this_track)
 
             if album:
-                self.playlist_metadata = {
+                self.album_metadata = {
                     "title": album.name,
                     "image_url": album.images[0].url if len(album.images) > 0 else const.UNKNOWN_ALBUM_COVER_URL,
                     "tracks": tracks,
@@ -217,7 +217,7 @@ class SpotifyTrack():
         self.resource_id_match = re.search(
             r"/track/([a-zA-Z0-9]+)", self.resource_url)
         self.resource_id = self.resource_id_match.group(1)
-        self.track_metadata = []
+        self.track_metadata = {}
 
     def load(self, track_data=None):
 
@@ -329,7 +329,7 @@ class SpotifyTrack():
 class SpotifyLikedSongs():
     def __init__(self, base: Spotify):
         self.base = base
-        self.playlist_metadata = []
+        self.playlist_metadata = {}
 
     def load(self):
 

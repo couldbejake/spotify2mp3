@@ -66,7 +66,7 @@ def get_user_input():
     # Validate and infer the type of content from the URL
     while True:
         try:
-            url = input(f"{colours.OKGREEN}Please provide a Spotify URL or '{LIKED_KEYWORD}' (right click, share, copy link):{colours.ENDC} \n\n> ")
+            url = input(f"{colours.OKGREEN}Please provide a Spotify URL (right click, share, copy link) or '{LIKED_KEYWORD}':{colours.ENDC} \n\n> ")
             choice = validate_spotify_url(url)
             break
         except ValueError as e:
