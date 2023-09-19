@@ -11,27 +11,35 @@ class YouTube:
     def __init__(self):
         pass
 
-    def search(self, search_query, max_length, min_view_count):
-        youtube_results = YoutubeSearch(search_query, max_results=1).to_json()
+    # TODO: Make videos to search configurable via parameter
+    def search(self, search_query, max_length, min_view_count, search_count = 3):
+        youtube_results = YoutubeSearch(search_query, max_results=search_count).to_json()
 
         if len(json.loads(youtube_results)['videos']) < 1:
             raise YoutubeItemNotFound('Skipped song -- Could not load from YouTube')
 
-        youtube_first_video = json.loads(youtube_results)['videos'][0]
+        youtube_videos = json.loads(youtube_results)['videos']
+        videos_meta = []
 
-        youtube_video_duration = youtube_first_video['duration'].split(':')
-        youtube_video_duration_seconds = int(youtube_video_duration[0]) * 60  + int(youtube_video_duration[1])
+        for video in youtube_videos:
+            youtube_video_duration = video['duration'].split(':')
+            youtube_video_duration_seconds = int(youtube_video_duration[0]) * 60  + int(youtube_video_duration[1])
 
-        youtube_video_views = re.sub('[^0-9]','', youtube_first_video['views'])
-        youtube_video_viewcount_safe = int(youtube_video_views) if str(youtube_video_views).isdigit() else 0
+            youtube_video_views = re.sub('[^0-9]','', video['views'])
+            youtube_video_viewcount_safe = int(youtube_video_views) if str(youtube_video_views).isdigit() else 0
 
-        youtube_video_link = "https://www.youtube.com" + youtube_first_video['url_suffix']
+            videos_meta.append((video, youtube_video_duration_seconds, youtube_video_viewcount_safe))
+
+        sorted_videos = sorted(videos_meta, key=lambda vid: vid[2], reverse=True) # Find top N videos with the most views
+        chosen_video = sorted_videos[0][0]
+
+        youtube_video_link = "https://www.youtube.com" + chosen_video['url_suffix']
 
         if(youtube_video_duration_seconds >= max_length):
-            raise ConfigVideoMaxLength('Skipped song due to MAX_LENGTH value in script')
+            raise ConfigVideoMaxLength(f'Skipped song due to MAX_LENGTH value in script {youtube_video_link}')
 
         if(youtube_video_viewcount_safe <= min_view_count):
-            raise ConfigVideoLowViewCount('Skipped song due to MIN_VIEW_COUNT value in script')
+            raise ConfigVideoLowViewCount(f'Skipped song due to MIN_VIEW_COUNT value in script {youtube_video_link}')
     
         return youtube_video_link
     
