@@ -12,7 +12,7 @@ class YouTube:
         pass
 
     # TODO: Make videos to search configurable via parameter
-    def search(self, search_query, max_length, min_view_count, search_count = 3):
+    def search(self, search_query, max_length, min_view_count, search_count = 1):
         youtube_results = YoutubeSearch(search_query, max_results=search_count).to_json()
 
         if len(json.loads(youtube_results)['videos']) < 1:
@@ -22,6 +22,12 @@ class YouTube:
         videos_meta = []
 
         for video in youtube_videos:
+            # print(video)
+            # youtube_video_title = video['title']
+            # TODO: pass in spotify song + artist and find which one matches most
+
+            # TODO: Check duration against spotify song duration to find closest
+
             youtube_video_duration = video['duration'].split(':')
             youtube_video_duration_seconds = int(youtube_video_duration[0]) * 60  + int(youtube_video_duration[1])
 
