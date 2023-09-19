@@ -1,5 +1,4 @@
 import os
-import signal
 import sys
 import tekore as tk
 from flask import Flask, request, redirect
@@ -59,7 +58,7 @@ def get_user_token():
         spotifyClientId, spotifyClientSecret, spotifyReturnUri)
 
     if refreshToken is None or refreshToken == '':
-        raise ValueError(f'RefreshToken not available in tekore config file')
+        raise ValueError('RefreshToken not available in tekore config file')
 
     return cred.refresh_user_token(refreshToken)
 
@@ -75,12 +74,12 @@ def get_anon_token():
 
         return json.loads(r_text)["accessToken"]
     except Exception as e:
-        raise ValueError('Could not retrieve anonymous token')
+        raise ValueError(f'Could not retrieve anonymous token {e}')
 
 def is_user_logged_in():
     if not does_config_exist():
         return False
-    
+
     (spotifyClientId, spotifyClientSecret, spotifyReturnUri, refreshToken) = tk.config_from_file(cfg_filename, return_refresh=True)
     return spotifyClientId != None and spotifyClientSecret != None and spotifyReturnUri != None and refreshToken != None
 
@@ -98,7 +97,7 @@ def do_user_login():
     global flask_process
 
     if not is_client_configured():
-        do_client_login()    
+        do_client_login()
     else:
         retry = input(f'\n{colours.OKGREEN}Spotify access is partially configured. Would you like to continue? {colours.ENDC}y\\n: ')
         if retry != "y":
@@ -167,7 +166,7 @@ def stop_flask():
     
 def app_factory() -> Flask:
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'aliens'
+    app.config['SECRET_KEY'] = __name__
 
     @app.route('/', methods=['GET'])
     def main():

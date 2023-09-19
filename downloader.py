@@ -1,6 +1,6 @@
 from const import colours
 from pytube.exceptions import AgeRestrictedError
-from exceptions import InvalidSpotifyURL, SpotifyAlbumNotFound, SpotifyTrackNotFound, SpotifyPlaylistNotFound, ConfigVideoMaxLength, ConfigVideoLowViewCount, YoutubeItemNotFound
+from exceptions import SpotifyAlbumNotFound, SpotifyTrackNotFound, SpotifyPlaylistNotFound, ConfigVideoMaxLength, ConfigVideoLowViewCount, YoutubeItemNotFound
 from apis.spotify import Spotify
 from utils import resave_audio_clip_with_metadata
 import sys
@@ -91,7 +91,7 @@ class SpotifyDownloader():
 
             return True
         
-        except SpotifyPlaylistNotFound as e:
+        except SpotifyPlaylistNotFound:
             print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this playlist is private or does not exist. Re-run with --login to access private playlists.{colours.ENDC}\n")
             sys.exit(1)
         

@@ -7,6 +7,7 @@
 # - Add multi-threading
 import argparse
 import sys
+from apis.options import AppOptions
 from apis.spotify import Spotify
 from apis.youtube import YouTube
 import utils
@@ -71,7 +72,6 @@ def get_user_input():
             break
         except ValueError as e:
             print(f"{colours.FAIL}Error:{colours.ENDC}{e}")
-            pass
 
     # Validate quality input
     quality = input(f"\n{colours.OKGREEN}Which quality would you like?{colours.ENDC} (Options: {colours.HEADER}low{colours.ENDC}, {colours.HEADER}medium{colours.ENDC}, {colours.HEADER}high{colours.ENDC}, or specify bitrate up to 320): ").strip()
@@ -87,85 +87,85 @@ def get_user_input():
 
     return choice, url, quality, authtype
 
-def main(authtype=None, playlist=None, song=None, album=None, private_playlist=False, liked=False, quality=None, min_views=None, max_length=None, disable_threading=False):
+def main(opts: AppOptions):
 
     # Validate the URL
-    arg_name = 'song' if song else 'playlist' if playlist and not private_playlist else 'private_playlist' if playlist and private_playlist else 'album' if album else None 
-    url = song or playlist or album
+    arg_name = 'song' if opts.song else 'playlist' if opts.playlist and not opts.private_playlist else 'private_playlist' if opts.playlist and opts.private_playlist else 'album' if opts.album else None
+    url = opts.song or opts.playlist or opts.album
 
-    if not (url or liked):
+    if not (url or opts.liked):
         print(f"{colours.FAIL}Error: You must specify a song, playlist, album, or '{LIKED_KEYWORD}' to download.{colours.ENDC}")
         parser.print_help()
         sys.exit(1)
     
     url_type = validate_spotify_url(url) if url != None else LIKED_KEYWORD
 
-    if (song and url_type != 'song') or (playlist and url_type not in ['playlist', 'private_playlist']) or (album and url_type != 'album'):
+    if (opts.song and url_type != 'song') or (opts.playlist and url_type not in ['playlist', 'private_playlist']) or (opts.album and url_type != 'album'):
         print(f"{colours.FAIL}Error: {arg_name} argument provided but value is a {url_type}{colours.ENDC}")
         sys.exit(1)
 
     # Validate auth type against parameters
-    if private_playlist and authtype != SpotifyAuthType.USER:
+    if opts.private_playlist and opts.authtype != SpotifyAuthType.USER:
         print(f"\n{colours.OKCYAN}[i] Downloading a private playlist requires authentication.{colours.ENDC}")
         authtype = SpotifyAuthType.USER
 
-    if liked and authtype != SpotifyAuthType.USER:
+    if opts.liked and opts.authtype != SpotifyAuthType.USER:
         print(f"\n{colours.OKCYAN}[i] Downloading {LIKED_KEYWORD} songs requires authentication.{colours.ENDC}")
         authtype = SpotifyAuthType.USER
 
     # Login if requested
-    if authtype == SpotifyAuthType.USER and not login.is_user_logged_in():
+    if opts.authtype == SpotifyAuthType.USER and not login.is_user_logged_in():
         login.do_user_login()
 
     print(f"\n{colours.CVIOLETBG2}Chosen Settings{colours.ENDC}\n")
     
-    if playlist:
-        if private_playlist:
-            print(f"{colours.OKGREEN}Private Playlist{colours.ENDC}: {playlist}")
+    if opts.playlist:
+        if opts.private_playlist:
+            print(f"{colours.OKGREEN}Private Playlist{colours.ENDC}: {opts.playlist}")
         else:
-            print(f"{colours.OKGREEN}Playlist{colours.ENDC}: {playlist}")
+            print(f"{colours.OKGREEN}Playlist{colours.ENDC}: {opts.playlist}")
 
-    if song:
-        print(f"{colours.OKGREEN}Song{colours.ENDC}: {song}")
+    if opts.song:
+        print(f"{colours.OKGREEN}Song{colours.ENDC}: {opts.song}")
 
-    if album:
-        print(f"{colours.OKGREEN}Album{colours.ENDC}: {album}")
+    if opts.album:
+        print(f"{colours.OKGREEN}Album{colours.ENDC}: {opts.album}")
 
-    if liked:
+    if opts.liked:
         print(f"{colours.OKGREEN}Liked Songs{colours.ENDC}")
     
-    if quality:
-        bitrate = get_bitrate_from_quality(quality)
-        print(f"{colours.OKGREEN}Song quality / bitrate{colours.ENDC}: {quality} / {bitrate} bps")
+    if opts.quality:
+        bitrate = get_bitrate_from_quality(opts.quality)
+        print(f"{colours.OKGREEN}Song quality / bitrate{colours.ENDC}: {opts.quality} / {bitrate} bps")
 
-    if min_views != DEFAULT_MIN_VIEWS_FOR_DOWNLOAD:
-        print(f"{colours.OKGREEN}Minimum view count{colours.ENDC}: {min_views}")
+    if opts.min_views != DEFAULT_MIN_VIEWS_FOR_DOWNLOAD:
+        print(f"{colours.OKGREEN}Minimum view count{colours.ENDC}: {opts.min_views}")
 
-    if max_length != DEFAULT_MAX_LENGTH_FOR_DOWNLOAD:
-        print(f"{colours.OKGREEN}Maximum video length{colours.ENDC}: {max_length}")
+    if opts.max_length != DEFAULT_MAX_LENGTH_FOR_DOWNLOAD:
+        print(f"{colours.OKGREEN}Maximum video length{colours.ENDC}: {opts.max_length}")
         
     if authtype == SpotifyAuthType.USER:
         print(f"{colours.OKGREEN}Accessing Spotify as logged in user {colours.ENDC}")
     elif authtype == SpotifyAuthType.ANONYMOUS:
         print(f"{colours.OKGREEN}Accessing Spotify anonymously {colours.ENDC}")
     
-    if disable_threading:
+    if opts.disable_threading:
         print(f"{colours.WARNING}Threading is disabled. Downloads may be slower.{colours.ENDC}")
 
     spotify = Spotify(authtype)
     youtube = YouTube()
 
-    downloader = SpotifyDownloader(spotify, youtube, get_bitrate_from_quality(quality), max_length, min_views)
+    downloader = SpotifyDownloader(spotify, youtube, get_bitrate_from_quality(opts.quality), opts.max_length, opts.min_views)
 
     success = False
 
-    if(song):
-        success = downloader.download_track(song)
-    elif(playlist):
-        success = downloader.download_playlist(playlist)  
-    elif(album):
-        success = downloader.download_album(album)
-    elif(liked):
+    if(opts.song):
+        success = downloader.download_track(opts.song)
+    elif(opts.playlist):
+        success = downloader.download_playlist(opts.playlist)  
+    elif(opts.album):
+        success = downloader.download_album(opts.album)
+    elif(opts.liked):
         success = downloader.download_liked_songs()
 
     downloader.rm_tmp_folder()
@@ -195,7 +195,8 @@ if __name__ == "__main__":
         args = parser.parse_args()
 
         authtype = SpotifyAuthType.USER if args.login else SpotifyAuthType.ANONYMOUS
-        main(authtype=authtype, playlist=args.playlist, song=args.song, album=args.album, liked=args.liked, quality=args.quality, min_views=args.min_views, max_length=args.max_length, disable_threading=args.disable_threading)
+        options = AppOptions(authtype=authtype, playlist=args.playlist, song=args.song, album=args.album, liked=args.liked, quality=args.quality, min_views=args.min_views, max_length=args.max_length, disable_threading=args.disable_threading)
+        main(options)
 
     else:  # If no command-line arguments are provided, use wizard mode.
         utils.print_splash_screen()
