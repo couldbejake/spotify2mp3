@@ -7,7 +7,6 @@
 # - Add multi-threading
 import argparse
 import sys
-from apis.options import AppOptions
 from apis.spotify import Spotify
 from apis.youtube import YouTube
 import utils
