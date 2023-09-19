@@ -165,7 +165,7 @@ class SpotifyDownloader():
                     raise Exception("No Track was supplied to download track!")
                 
             if(track):
-                print(f"\n{colours.OKGREEN}Searching for song [{idx+1}/{idx_max+1}] {colours.ENDC}: {track.get_title(True)} by {track.get_artist()}")
+                print(f"\n{colours.OKGREEN}Searching for song [{idx+1}/{idx_max}] {colours.ENDC}: {track.get_title(True)} by {track.get_artist()}")
             
             track_path = output_path + track.get_title(True) + ".mp3"
 
