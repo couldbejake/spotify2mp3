@@ -43,7 +43,7 @@ def validate_spotify_url(url):
     """Validate the Spotify URL and infer the type."""
     song_pattern = r"https://open\.spotify\.com/track/[A-Za-z0-9?=\-]+"
     playlist_pattern = r"https://open\.spotify\.com/playlist/[A-Za-z0-9?=\-]+"
-    private_playlist_pattern = r"https://open\.spotify\.com/playlist/[A-Za-z0-9?=[A-Za-z0-9&=[A-Za-z0-9\-]+"
+    private_playlist_pattern = r"https://open\.spotify\.com/playlist/[A-Za-z0-9?=[A-Za-z0-9&pt=[A-Za-z0-9\-]+"
     album_pattern = r"https://open\.spotify\.com/album/[A-Za-z0-9?=\-]+"
 
     if url == LIKED_KEYWORD:
