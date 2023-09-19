@@ -148,7 +148,7 @@ def do_client_login():
     # ClientSecret input
     client_secret = input(f"{colours.OKGREEN}Enter Client Secret{colours.ENDC}: ").strip()
 
-    while client_secret == None or client_secret == '':
+    while client_secret == None or len(client_secret) == 0:
         client_secret = input(f"{colours.WARNING}Enter a valid value! {colours.OKGREEN}Enter Client Secret{colours.ENDC}: ").strip()
 
     new_conf = (client_id, client_secret, login_redirect_url, None)
@@ -163,7 +163,7 @@ def start_flask():
 def stop_flask():
     pid = os.getpid()
     os.kill(pid, 9) # The second argument is the signal, 9 stands for SIGKILL.
-    
+
 def app_factory() -> Flask:
     app = Flask(__name__)
     app.config['SECRET_KEY'] = __name__
