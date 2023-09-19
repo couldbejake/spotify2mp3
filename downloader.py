@@ -1,6 +1,6 @@
 from const import colours
 from pytube.exceptions import AgeRestrictedError
-from exceptions import InvalidSpotifyURL, SpotifyAlbumNotFound, SpotifyTrackNotFound, SpotifyPlaylistNotFound, ConfigVideoMaxLength, ConfigVideoLowViewCount
+from exceptions import InvalidSpotifyURL, SpotifyAlbumNotFound, SpotifyTrackNotFound, SpotifyPlaylistNotFound, ConfigVideoMaxLength, ConfigVideoLowViewCount, YoutubeItemNotFound
 from apis.spotify import Spotify
 from utils import resave_audio_clip_with_metadata
 import sys
@@ -92,9 +92,8 @@ class SpotifyDownloader():
             return True
         
         except SpotifyPlaylistNotFound as e:
-            print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this playlist is private or does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
+            print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this playlist is private or does not exist. Re-run with --login to access private playlists.{colours.ENDC}\n")
             sys.exit(1)
-            return False
         
     def download_tracks(self, output_path, tracks):
 
@@ -113,6 +112,12 @@ class SpotifyDownloader():
 
                 skipped_tracks.append((track, e))
             
+            except YoutubeItemNotFound as e:
+                
+                print(f"   - {colours.WARNING}[!] Skipped a song we found on Spotify but not on YouTube.{colours.ENDC}\n")
+
+                skipped_tracks.append((track, e))
+
             except ConfigVideoMaxLength as e:
                 
                 print(f"   - {colours.WARNING}[!] Skipped a song - The found song was longer than the configured max song length, {colours.ENDC}(use the command line to increase this).{colours.ENDC}\n")
@@ -196,7 +201,7 @@ class SpotifyDownloader():
                 return False
             else:
                 raise e
-            
+
         except ConfigVideoMaxLength as e:
             if(not as_sub_function):
                 print(f"\n{colours.FAIL}Error: {colours.ENDC}The found song was longer than the configured max song length (use the command line to increase this) {colours.ENDC} (e: {e}).{colours.ENDC}\n")

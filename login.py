@@ -1,4 +1,5 @@
 import os
+import signal
 import sys
 import tekore as tk
 from flask import Flask, request, redirect
@@ -18,7 +19,7 @@ spotify = tk.Spotify()
 userToken = None  # User token
 cred = None  # credentials object for doing token ops
 auths = {}  # Auth attempts. Stores data across spotify login
-flask_thread = None
+flask_process = None
 
 cfg_filename = 'tekore_cfg.ini'
 app_host = "localhost"
@@ -94,23 +95,27 @@ def does_config_exist():
     return os.path.exists(cfg_filename)
 
 def do_user_login():
-    global flask_thread
+    global flask_process
+
     if not is_client_configured():
         do_client_login()    
     else:
-        retry = input(f'{colours.OKGREEN}Spotify access is partially configured. Would you like to continue? {colours.ENDC}y\\n: ')
+        retry = input(f'\n{colours.OKGREEN}Spotify access is partially configured. Would you like to continue? {colours.ENDC}y\\n: ')
         if retry != "y":
             do_client_login()
 
     input(f'{permission_prompt}')
 
-    flask_thread = multiprocessing.Process(target=start_flask)
     threading.Timer(1.25, lambda: webbrowser.open(app_url)).start()
-    flask_thread.start()
+
+    flask_process = multiprocessing.Process(target=start_flask)
+    flask_process.start()
 
     sleep(5)
-    print(f'\n\n{colours.OKGREEN}Success! Login complete{colours.ENDC}')
-    input(f'{colours.OKBLUE}Press {colours.ENDC}enter{colours.OKBLUE} to test the connection{colours.ENDC}')
+    print(f'\n\n{colours.OKGREEN}Success! Login complete.{colours.ENDC}')
+    input(f'{colours.OKBLUE}Press {colours.OKGREEN}enter{colours.OKBLUE} to test the connection{colours.ENDC}')
+
+    flask_process.terminate()
 
     # Test login
     try:
@@ -119,11 +124,11 @@ def do_user_login():
         topTracks = spotify.current_user_top_tracks()
 
         item = topTracks.items[0]
-        print(f'{colours.OKGREEN}It worked! Your Top Track is: {item.name} by {item.artists[0].name}{colours.ENDC}')
-    except tk.HTTPError:
-        print(f'{colours.FAIL}Something went wrong. Your credentials have been reset. Try again.{colours.ENDC}')
+        print(f'\n{colours.OKBLUE}It worked! {colours.ENDC}Your Top Track is: {item.name} by {item.artists[0].name}\n\n')
+    except tk.HTTPError as e:
         if is_client_configured():
             os.remove(cfg_filename)
+        print(f'{colours.FAIL}Something went wrong. Your credentials have been reset. Try again.{colours.ENDC}{e}')
         sys.exit(1)
 
 
@@ -150,16 +155,16 @@ def do_client_login():
     new_conf = (client_id, client_secret, login_redirect_url, None)
     tk.config_to_file(cfg_filename, new_conf)
 
-    print(f'{colours.OKGREEN}Saved!{colours.ENDC}')
+    print(f'{colours.OKCYAN}Saved!{colours.ENDC}')
 
 def start_flask():
     flask_app = app_factory()
     flask_app.run(app_host, app_port)
 
 def stop_flask():
-    global flask_thread
-    flask_thread.terminate()
-
+    # This happens from the flask sub-process, so does not terminate the main process
+    sys.exit()
+    
 def app_factory() -> Flask:
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'aliens'
@@ -169,7 +174,7 @@ def app_factory() -> Flask:
         (spotifyClientId, spotifyClientSecret, spotifyReturnUri) = tk.config_from_file(cfg_filename, return_refresh=False)
         cred = tk.Credentials(spotifyClientId, spotifyClientSecret, spotifyReturnUri)
 
-        auth = tk.UserAuth(cred, tk.scope.every)
+        auth = tk.UserAuth(cred, tk.scope.read)
         auths[auth.state] = auth
         return redirect(auth.url, 307)
 
@@ -192,7 +197,7 @@ def app_factory() -> Flask:
     
     @app.route('/complete', methods=['GET'])
     def login_complete():
-        threading.Timer(1.25, stop_flask).start()
+        threading.Timer(1.25, stop_flask).start() # wait long enough to return the html
 
         return """
         <h1>Login complete!</h1>

@@ -15,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 class Spotify:
 
-    def __init__(self, authType: const.SpotifyAuthType, market: str):
+    def __init__(self, authType: const.SpotifyAuthType):
         if authType == const.SpotifyAuthType.USER:
             token = login.get_user_token()
         elif authType == const.SpotifyAuthType.ANONYMOUS:
@@ -27,7 +27,6 @@ class Spotify:
             raise ValueError(
                 'Error retrieving access token for user refresh token.')
 
-        self.market = market
         self.tekore_spotify = tk.Spotify(token)
 
     def likedSongs(self):
@@ -61,8 +60,8 @@ class SpotifyPlaylist():
     def load(self):
 
         try:
-            playlist = self.base.tekore_spotify.playlist(
-                self.resource_id, self.base.market)
+            playlist = self.base.tekore_spotify.playlist(self.resource_id)
+            
             # handles spotify API paging internally
             playlist_tracks = self.base.tekore_spotify.all_items(playlist.tracks)
             tracks = []
@@ -85,6 +84,9 @@ class SpotifyPlaylist():
                     "Failed to fetch playlist data from Spotify API.")
 
         except tk.HTTPError as e:
+            if e.response.status_code == 404:
+                raise SpotifyPlaylistNotFound("Playlist not found.")
+            
             raise SpotifyRetrievalError(f'Error retrieving playlist:{e}')
 
     def get_title(self, sanitize=False):
@@ -143,8 +145,7 @@ class SpotifyAlbum():
     def load(self):
 
         try:
-            album = self.base.tekore_spotify.album(
-                self.resource_id, self.base.market)
+            album = self.base.tekore_spotify.album(self.resource_id)
             # handles spotify API paging internally
             album_tracks = self.base.tekore_spotify.all_items(album.tracks)
             tracks = []
@@ -223,8 +224,7 @@ class SpotifyTrack():
         if track_data == None:
 
             try:
-                track_data = self.base.tekore_spotify.track(
-                    self.resource_id, self.base.market)
+                track_data = self.base.tekore_spotify.track(self.resource_id)
             except tk.HTTPError as e:
                 raise SpotifyRetrievalError(f'Error retrieving track:{e}')
 
@@ -334,7 +334,7 @@ class SpotifyLikedSongs():
     def load(self):
 
         try:
-            playlist = self.base.tekore_spotify.saved_tracks('from_token', limit=50)
+            playlist = self.base.tekore_spotify.saved_tracks(limit=50)
             # handles spotify API paging internally
             playlist_tracks = self.base.tekore_spotify.all_items(playlist)
             tracks = []

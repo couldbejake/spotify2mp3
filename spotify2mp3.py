@@ -43,12 +43,15 @@ def validate_spotify_url(url):
     """Validate the Spotify URL and infer the type."""
     song_pattern = r"https://open\.spotify\.com/track/[A-Za-z0-9?=\-]+"
     playlist_pattern = r"https://open\.spotify\.com/playlist/[A-Za-z0-9?=\-]+"
+    private_playlist_pattern = r"https://open\.spotify\.com/playlist/[A-Za-z0-9?=[A-Za-z0-9&=[A-Za-z0-9\-]+"
     album_pattern = r"https://open\.spotify\.com/album/[A-Za-z0-9?=\-]+"
 
     if url == LIKED_KEYWORD:
         return url
     elif re.match(song_pattern, url):
         return 'song'
+    elif re.match(private_playlist_pattern, url):
+        return 'private_playlist'
     elif re.match(playlist_pattern, url):
         return 'playlist'
     elif re.match(album_pattern, url):
@@ -59,14 +62,16 @@ def validate_spotify_url(url):
 
 def get_user_input():
     """Prompt the user for input when no arguments are supplied."""
-    url = input(f"{colours.OKGREEN}Please provide a Spotify URL or '{LIKED_KEYWORD}' (right click, share, copy link):{colours.ENDC} \n\n> ")
 
     # Validate and infer the type of content from the URL
-    try:
-        choice = validate_spotify_url(url)
-    except ValueError as e:
-        print(f"{colours.FAIL}Error: {e}{colours.ENDC}")
-        sys.exit(1)
+    while True:
+        try:
+            url = input(f"{colours.OKGREEN}Please provide a Spotify URL or '{LIKED_KEYWORD}' (right click, share, copy link):{colours.ENDC} \n\n> ")
+            choice = validate_spotify_url(url)
+            break
+        except ValueError as e:
+            print(f"{colours.FAIL}Error:{colours.ENDC}{e}")
+            pass
 
     # Validate quality input
     quality = input(f"\n{colours.OKGREEN}Which quality would you like?{colours.ENDC} (Options: {colours.HEADER}low{colours.ENDC}, {colours.HEADER}medium{colours.ENDC}, {colours.HEADER}high{colours.ENDC}, or specify bitrate up to 320): ").strip()
@@ -82,10 +87,10 @@ def get_user_input():
 
     return choice, url, quality, authtype
 
-def main(authtype=None, playlist=None, song=None, album=None, liked=False, quality=None, min_views=None, max_length=None, disable_threading=False):
+def main(authtype=None, playlist=None, song=None, album=None, private_playlist=False, liked=False, quality=None, min_views=None, max_length=None, disable_threading=False):
 
     # Validate the URL
-    arg_name = 'song' if song else 'playlist' if playlist else 'album' if album else None 
+    arg_name = 'song' if song else 'playlist' if playlist and not private_playlist else 'private_playlist' if playlist and private_playlist else 'album' if album else None 
     url = song or playlist or album
 
     if not (url or liked):
@@ -95,25 +100,30 @@ def main(authtype=None, playlist=None, song=None, album=None, liked=False, quali
     
     url_type = validate_spotify_url(url) if url != None else LIKED_KEYWORD
 
-    if (song and url_type != 'song') or (playlist and url_type != 'playlist') or (album and url_type != 'album'):
+    if (song and url_type != 'song') or (playlist and url_type not in ['playlist', 'private_playlist']) or (album and url_type != 'album'):
         print(f"{colours.FAIL}Error: {arg_name} argument provided but value is a {url_type}{colours.ENDC}")
         sys.exit(1)
 
     # Validate auth type against parameters
+    if private_playlist and authtype != SpotifyAuthType.USER:
+        print(f"\n{colours.OKCYAN}[i] Downloading a private playlist requires authentication.{colours.ENDC}")
+        authtype = SpotifyAuthType.USER
+
     if liked and authtype != SpotifyAuthType.USER:
-        print(f"{colours.FAIL}Error: Downloading {LIKED_KEYWORD} songs requires login. Run again with --login{colours.ENDC}")
-        sys.exit(1)
+        print(f"\n{colours.OKCYAN}[i] Downloading {LIKED_KEYWORD} songs requires authentication.{colours.ENDC}")
+        authtype = SpotifyAuthType.USER
 
     # Login if requested
     if authtype == SpotifyAuthType.USER and not login.is_user_logged_in():
-        print(f'{colours.WARNING}User login has not been setup. Beginning setup process.{colours.ENDC}')
-
         login.do_user_login()
 
     print(f"\n{colours.CVIOLETBG2}Chosen Settings{colours.ENDC}\n")
     
     if playlist:
-        print(f"{colours.OKGREEN}Playlist{colours.ENDC}: {playlist}")
+        if private_playlist:
+            print(f"{colours.OKGREEN}Private Playlist{colours.ENDC}: {playlist}")
+        else:
+            print(f"{colours.OKGREEN}Playlist{colours.ENDC}: {playlist}")
 
     if song:
         print(f"{colours.OKGREEN}Song{colours.ENDC}: {song}")
@@ -142,9 +152,7 @@ def main(authtype=None, playlist=None, song=None, album=None, liked=False, quali
     if disable_threading:
         print(f"{colours.WARNING}Threading is disabled. Downloads may be slower.{colours.ENDC}")
 
-    # TODO: Supply Market as an optional parameter?
-    market = 'from_token' if authtype == SpotifyAuthType.USER else 'US'
-    spotify = Spotify(authtype, market)
+    spotify = Spotify(authtype)
     youtube = YouTube()
 
     downloader = SpotifyDownloader(spotify, youtube, get_bitrate_from_quality(quality), max_length, min_views)
@@ -173,7 +181,7 @@ if __name__ == "__main__":
 
         parser = argparse.ArgumentParser(description="spotify2mp3: Download songs from Spotify by searching them on YouTube and converting the audio.")
         group = parser.add_mutually_exclusive_group(required=True)
-        group.add_argument("-p", "--playlist", "--list", help="Specify a playlist URL or ID to download", type=str)
+        group.add_argument("-p", "--playlist", "--list", help="Specify a playlist URL or ID to download. Private playlists must be placed in quotes '<playlist_url>' ", type=str)
         group.add_argument("-s", "--song", "--single", "-t", "--track", help="Specify a song URL or ID to download", type=str)
         group.add_argument("-a", "--album", help="Specify an album URL or ID to download", type=str)
         group.add_argument("-l", f"--{LIKED_KEYWORD}", help=f"Retrieves user's {LIKED_KEYWORD} songs", action="store_true")
@@ -182,7 +190,7 @@ if __name__ == "__main__":
         parser.add_argument("--min-views", help="Minimum view count on YouTube", type=int, default=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD)
         parser.add_argument("--max-length", help="Maximum video length on YouTube in minutes", type=int, default=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
         parser.add_argument("--disable-threading", help="Disables multiple threads to download songs.", action="store_true")
-        parser.add_argument("--login", help="Allows downloading user specific content", action="store_true")
+        parser.add_argument("--login", help=f"Allows downloading user specific content such as {LIKED_KEYWORD} songs or private playlists", action="store_true")
 
         args = parser.parse_args()
 
@@ -197,6 +205,8 @@ if __name__ == "__main__":
             main(authtype=authtype, song=url, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
         elif choice == 'playlist':
             main(authtype=authtype, playlist=url, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
+        elif choice == 'private_playlist':
+            main(authtype=authtype, playlist=url, private_playlist=True, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
         elif choice == 'album':
             main(authtype=authtype, album=url, quality=quality, min_views=DEFAULT_MIN_VIEWS_FOR_DOWNLOAD, max_length=DEFAULT_MAX_LENGTH_FOR_DOWNLOAD)
         elif choice == LIKED_KEYWORD:
