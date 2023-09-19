@@ -73,10 +73,6 @@ Install packages using pip
 
 `$ pip install -r requirements.txt`
 
-Login to spotify
-
-`$ python login.py`
-
 Run the script
 
 `$ python spotify2mp3.py`
