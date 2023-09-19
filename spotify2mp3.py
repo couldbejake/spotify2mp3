@@ -162,7 +162,7 @@ def main(authtype=None, playlist=None, song=None, album=None, private_playlist=F
     if(song):
         success = downloader.download_track(song)
     elif(playlist):
-        success = downloader.download_playlist(playlist)  
+        success = downloader.download_playlist(playlist)
     elif(album):
         success = downloader.download_album(album)
     elif(liked):
