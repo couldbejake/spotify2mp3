@@ -111,11 +111,11 @@ def do_user_login():
     flask_process = multiprocessing.Process(target=start_flask)
     flask_process.start()
 
-    sleep(5)
+    while flask_process.is_alive():
+        sleep(1)
+
     print(f'\n\n{colours.OKGREEN}Success! Login complete.{colours.ENDC}')
     input(f'{colours.OKBLUE}Press {colours.OKGREEN}enter{colours.OKBLUE} to test the connection{colours.ENDC}')
-
-    flask_process.terminate()
 
     # Test login
     try:
@@ -162,8 +162,8 @@ def start_flask():
     flask_app.run(app_host, app_port)
 
 def stop_flask():
-    # This happens from the flask sub-process, so does not terminate the main process
-    sys.exit()
+    pid = os.getpid()
+    os.kill(pid, 9) # The second argument is the signal, 9 stands for SIGKILL.
     
 def app_factory() -> Flask:
     app = Flask(__name__)
@@ -197,7 +197,7 @@ def app_factory() -> Flask:
     
     @app.route('/complete', methods=['GET'])
     def login_complete():
-        threading.Timer(0.5, stop_flask).start() # wait long enough to return the html
+        threading.Timer(3, stop_flask).start() # wait long enough to return the html
 
         return """
         <h1>Login complete!</h1>
