@@ -120,13 +120,13 @@ class SpotifyDownloader():
 
             except ConfigVideoMaxLength as e:
                 
-                print(f"   - {colours.WARNING}[!] Skipped a song - The found song was longer than the configured max song length, {colours.ENDC}(use the command line to increase this).{colours.ENDC}\n")
+                print(f"   - {colours.WARNING}[!] Skipped a song - {e}, {colours.ENDC}(use the command line to increase this).{colours.ENDC}\n")
 
                 skipped_tracks.append((track, e))
             
             except ConfigVideoLowViewCount as e:
                 
-                print(f"   - {colours.WARNING}[!] Skipped a song - The found song had less views than the minimum view count, {colours.ENDC}(use the command line to increase this).\n")
+                print(f"   - {colours.WARNING}[!] Skipped a song - {e}, {colours.ENDC}(use the command line to increase this).\n")
 
                 skipped_tracks.append((track, e))
 

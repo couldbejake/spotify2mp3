@@ -31,15 +31,15 @@ class YouTube:
             videos_meta.append((video, youtube_video_duration_seconds, youtube_video_viewcount_safe))
 
         sorted_videos = sorted(videos_meta, key=lambda vid: vid[2], reverse=True) # Find top N videos with the most views
-        chosen_video = sorted_videos[0][0]
+        chosen_video = sorted_videos[0]
 
-        youtube_video_link = "https://www.youtube.com" + chosen_video['url_suffix']
+        youtube_video_link = "https://www.youtube.com" + chosen_video[0]['url_suffix']
 
-        if(youtube_video_duration_seconds >= max_length):
-            raise ConfigVideoMaxLength(f'Skipped song due to MAX_LENGTH value in script {youtube_video_link}')
+        if(chosen_video[1] >= max_length):
+            raise ConfigVideoMaxLength(f'Length {chosen_video[1]}s exceeds MAX_LENGTH value of {max_length}s [{youtube_video_link}]')
 
-        if(youtube_video_viewcount_safe <= min_view_count):
-            raise ConfigVideoLowViewCount(f'Skipped song due to MIN_VIEW_COUNT value in script {youtube_video_link}')
+        if(chosen_video[2] <= min_view_count):
+            raise ConfigVideoLowViewCount(f'View count {chosen_video[2]} does not meet MIN_VIEW_COUNT value of {min_view_count} [{youtube_video_link}]')
     
         return youtube_video_link
     
