@@ -107,11 +107,11 @@ def main(opts: AppOptions):
     # Validate auth type against parameters
     if opts.private_playlist and opts.authtype != SpotifyAuthType.USER:
         print(f"\n{colours.OKCYAN}[i] Downloading a private playlist requires authentication.{colours.ENDC}")
-        authtype = SpotifyAuthType.USER
+        opts.authtype = SpotifyAuthType.USER
 
     if opts.liked and opts.authtype != SpotifyAuthType.USER:
         print(f"\n{colours.OKCYAN}[i] Downloading {LIKED_KEYWORD} songs requires authentication.{colours.ENDC}")
-        authtype = SpotifyAuthType.USER
+        opts.authtype = SpotifyAuthType.USER
 
     # Login if requested
     if opts.authtype == SpotifyAuthType.USER and not login.is_user_logged_in():
@@ -144,15 +144,15 @@ def main(opts: AppOptions):
     if opts.max_length != DEFAULT_MAX_LENGTH_FOR_DOWNLOAD:
         print(f"{colours.OKGREEN}Maximum video length{colours.ENDC}: {opts.max_length}")
         
-    if authtype == SpotifyAuthType.USER:
+    if opts.authtype == SpotifyAuthType.USER:
         print(f"{colours.OKGREEN}Accessing Spotify as logged in user {colours.ENDC}")
-    elif authtype == SpotifyAuthType.ANONYMOUS:
+    elif opts.authtype == SpotifyAuthType.ANONYMOUS:
         print(f"{colours.OKGREEN}Accessing Spotify anonymously {colours.ENDC}")
     
     if opts.disable_threading:
         print(f"{colours.WARNING}Threading is disabled. Downloads may be slower.{colours.ENDC}")
 
-    spotify = Spotify(authtype)
+    spotify = Spotify(opts.authtype)
     youtube = YouTube()
 
     downloader = SpotifyDownloader(spotify, youtube, get_bitrate_from_quality(opts.quality), opts.max_length, opts.min_views)
