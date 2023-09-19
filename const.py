@@ -1,5 +1,6 @@
 import sys
 import string
+import os
 
 def supports_24bit_color():
     """Determine if the terminal supports 24-bit color."""
