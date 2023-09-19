@@ -98,6 +98,8 @@ def main(authtype=None, playlist=None, song=None, album=None, private_playlist=F
         sys.exit(1)
     
     url_type = validate_spotify_url(url) if url != None else LIKED_KEYWORD
+    if url_type == 'private_playlist':
+        private_playlist = True
 
     if (song and url_type != 'song') or (playlist and url_type not in ['playlist', 'private_playlist']) or (album and url_type != 'album'):
         print(f"{colours.FAIL}Error: {arg_name} argument provided but value is a {url_type}{colours.ENDC}")
