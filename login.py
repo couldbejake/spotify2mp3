@@ -197,12 +197,13 @@ def app_factory() -> Flask:
     
     @app.route('/complete', methods=['GET'])
     def login_complete():
-        threading.Timer(1.25, stop_flask).start() # wait long enough to return the html
+        threading.Timer(0.5, stop_flask).start() # wait long enough to return the html
 
         return """
         <h1>Login complete!</h1>
         <br>
         <h4>Close this window to return to the application</h4>
+        <script>window.close()</script>
         """
 
 
