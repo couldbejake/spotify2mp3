@@ -28,10 +28,10 @@ class YouTube:
         youtube_video_link = "https://www.youtube.com" + youtube_first_video['url_suffix']
 
         if(youtube_video_duration_seconds >= max_length):
-            raise ConfigVideoMaxLength('Skipped song due to MAX_LENGTH value in script')
+            raise ConfigVideoMaxLength(f'Skipped song due to MAX_LENGTH value in script {youtube_video_link}')
 
         if(youtube_video_viewcount_safe <= min_view_count):
-            raise ConfigVideoLowViewCount('Skipped song due to MIN_VIEW_COUNT value in script')
+            raise ConfigVideoLowViewCount(f'Skipped song due to MIN_VIEW_COUNT value in script {youtube_video_link}')
     
         return youtube_video_link
     
