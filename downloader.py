@@ -60,10 +60,10 @@ class SpotifyDownloader():
 
 
         except SpotifyAlbumNotFound as e:
-            print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this album does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
-            sys.exit(1)
             
-            return False
+            print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this album does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
+            
+            sys.exit(1)
 
     def download_playlist(self, playlist_url):
 
@@ -105,9 +105,10 @@ class SpotifyDownloader():
             return True
         
         except SpotifyPlaylistNotFound as e:
+            
             print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this playlist is private or does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
+            
             sys.exit(1)
-            return False
             
 
     def download_track(self, track_url = None, track = None, output_path = None, as_sub_function = False):

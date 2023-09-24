@@ -30,7 +30,7 @@ class Spotify:
             )
         except Exception as e:
             print(f"{colours.FAIL}Error: It looks like Spotify has automatically temporarily blocked you..{colours.ENDC}")
-            sys.exit(0)
+            sys.exit(1)
 
         return json.loads(r_text)["accessToken"]
 
