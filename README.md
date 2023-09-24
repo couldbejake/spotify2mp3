@@ -1,7 +1,6 @@
 <div align="center">
 
   <img src="assets/logo.png" alt="logo" width="250" height="auto" />  
-  <hr/>
   <p>
     Simple, free, and unlimited Spotify MP3 downloads
   </p>
