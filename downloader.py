@@ -55,12 +55,12 @@ class SpotifyDownloader():
                 
                 except ConfigVideoMaxLength as e:
                     
-                    print(f"\n{colours.WARNING}[!] Skipped a song - The found song was longer than the configured max song length, {colours.ENDC}(use the command line to increase this).{colours.ENDC}\n")
+                    print(f"\n{colours.WARNING}[!] Skipped a song - The found song was longer than the configured max song length, {colours.ENDC}(use the cli to increase this).{colours.ENDC}\n")
                     skipped_songs += 1
                 
                 except ConfigVideoLowViewCount as e:
                     
-                    print(f"\n{colours.WARNING}[!] Skipped a song - The found song had less views than the minimum view count, {colours.ENDC}(use the command line to increase this).\n")
+                    print(f"\n{colours.WARNING}[!] Skipped a song - The found song had less views than the minimum view count, {colours.ENDC}(use the cli to increase this).\n")
                     skipped_songs += 1
 
             if(skipped_songs > 0):
@@ -98,13 +98,13 @@ class SpotifyDownloader():
                 
                 except ConfigVideoMaxLength as e:
                     
-                    print(f"\n{colours.WARNING}[!] Skipped a song - The found song was longer than the configured max song length, {colours.ENDC}(use the command line to increase this).{colours.ENDC}\n")
+                    print(f"\n{colours.WARNING}[!] Skipped a song - The found song was longer than the configured max song length, {colours.ENDC}(use the cli to increase this).{colours.ENDC}\n")
 
                     skipped_songs += 1
                 
                 except ConfigVideoLowViewCount as e:
                     
-                    print(f"\n{colours.WARNING}[!] Skipped a song - The found song had less views than the minimum view count, {colours.ENDC}(use the command line to increase this).\n")
+                    print(f"\n{colours.WARNING}[!] Skipped a song - The found song had less views than the minimum view count, {colours.ENDC}(use the cli to increase this).\n")
 
                     skipped_songs += 1
 
@@ -169,14 +169,14 @@ class SpotifyDownloader():
             
         except ConfigVideoMaxLength as e:
             if(not as_sub_function):
-                print(f"\n{colours.FAIL}Error: {colours.ENDC}The found song was longer than the configured max song length (use the command line to increase this) {colours.ENDC} (e: {e}).{colours.ENDC}\n")
+                print(f"\n{colours.FAIL}Error: {colours.ENDC}The found song was longer than the configured max song length (use the cli to increase this) {colours.ENDC} (e: {e}).{colours.ENDC}\n")
                 return False
             else:
                 raise e
 
         except ConfigVideoLowViewCount as e:
             if(not as_sub_function):
-                print(f"\n{colours.FAIL}Error: {colours.ENDC}The found song had less views than the minimum view count (use the command line to increase this){colours.ENDC} (e: {e}).{colours.ENDC}\n")
+                print(f"\n{colours.FAIL}Error: {colours.ENDC}The found song had less views than the minimum view count (use the cli to increase this){colours.ENDC} (e: {e}).{colours.ENDC}\n")
                 return False
             else:
                 raise e
