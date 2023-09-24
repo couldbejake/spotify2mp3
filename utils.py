@@ -35,12 +35,12 @@ def random_string(length=10):
     letters = string.ascii_letters  # This includes both lowercase and uppercase letters.
     return ''.join(random.choice(letters) for i in range(length))
 
-def resave_audio_clip_with_metadata(audio_input_path, song_metadata, song_output_path):
+def resave_audio_clip_with_metadata(audio_input_path, song_metadata, song_output_path, audio_quality):
 
     temporary_audio_path = "./temp/" + random_string(20) + ".mp3"
 
     clip = AudioFileClip(audio_input_path)
-    clip.write_audiofile(temporary_audio_path, logger=None)
+    clip.write_audiofile(temporary_audio_path, logger=None, bitrate=f'{audio_quality}k')
 
     audiofile = eyed3.load(temporary_audio_path)
 

@@ -38,19 +38,23 @@ class YouTube:
     def download(self, url, audio_bitrate):
 
         youtube_video = pytubeYouTube(url)
-        youtube_video_streams = youtube_video.streams.filter(only_audio=True, file_extension='mp4')
+        youtube_video_streams = youtube_video.streams.filter(only_audio=True)
 
         correctIndex = 0
 
         selected_bitrate_normalised = audio_bitrate / 1000
 
+        #select the best audio quality
+        finalKbps = 0
+        correctIndex = 0
         for i,vid in enumerate(youtube_video_streams):
             currKbps = int(re.sub("[^0-9]", "", vid.abr))
-            if currKbps < selected_bitrate_normalised:
+            if currKbps <= selected_bitrate_normalised:
                 correctIndex = i
+                finalKbps = currKbps
 
         video_stream = youtube_video_streams[correctIndex]
 
         yt_tmp_out = video_stream.download(output_path="./temp/")
 
-        return yt_tmp_out
+        return yt_tmp_out, finalKbps
