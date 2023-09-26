@@ -28,4 +28,4 @@ lxml==4.8.0
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.12.2
 tekore==5.0.1
-flask==2.1.2
+flask==2.2.5
