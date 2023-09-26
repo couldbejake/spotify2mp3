@@ -18,3 +18,6 @@ class SpotifyPlaylistNotFound(Exception):
 
 class SpotifyAlbumNotFound(Exception):
     pass
+
+class SpotifyRetrievalError(Exception):
+    pass

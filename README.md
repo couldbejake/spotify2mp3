@@ -81,7 +81,9 @@ Brew yourself a coffee, you deserved it!
 
 ## Getting spotify playlist URL
 
-Paste a Spotify Song, Playlist or Album URL into the program. To get the url:
+Paste a Spotify Song, Playlist or Album URL into the program. You can also specify 'liked' to retrieve your liked songs.
+
+To get the url:
 
 1. Right click on a Song, Playlist or Album
 2. Share
