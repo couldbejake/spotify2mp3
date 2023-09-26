@@ -1,8 +1,6 @@
 <div align="center">
 
-  <img src="assets/logo.png" alt="logo" width="200" height="auto" />
-  <h1>spotify2mp3</h1>
-  
+  <img src="assets/logo.png" alt="logo" width="250" height="auto" />  
   <p>
     Simple, free, and unlimited Spotify MP3 downloads
   </p>

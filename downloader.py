@@ -26,6 +26,8 @@ class SpotifyDownloader():
         self.min_view_count = min_view_count
 
     def download_album(self, playlist_url):
+        
+        skipped_songs = 0
 
         print(f"\n{colours.OKBLUE}[!] Retrieving spotify album")
 
@@ -38,6 +40,7 @@ class SpotifyDownloader():
             tracks = album.get_tracks()
 
             print(f"\n{colours.OKBLUE}[!] Found {len(tracks)} tracks in album.")
+            
             time.sleep(3)
 
             output_path = "downloads/albums/" + album.get_title(True) + "/"
@@ -46,6 +49,7 @@ class SpotifyDownloader():
             return True
         
         except SpotifyAlbumNotFound as e:
+            
             print(f"\n{colours.FAIL}Error: {colours.ENDC}{colours.WARNING}It's probably that this album does not exist {colours.ENDC} (e: {e}).{colours.ENDC}\n")
             sys.exit(1)
     
@@ -120,13 +124,13 @@ class SpotifyDownloader():
 
             except ConfigVideoMaxLength as e:
                 
-                print(f"   - {colours.WARNING}[!] Skipped a song - {e}, {colours.ENDC}(use the command line to increase this).{colours.ENDC}\n")
+                print(f"\n{colours.WARNING}[!] Skipped a song - The found song was longer than the configured max song length, {colours.ENDC}(use the cli to increase this).{colours.ENDC}\n")
 
                 skipped_tracks.append((track, e))
             
             except ConfigVideoLowViewCount as e:
                 
-                print(f"   - {colours.WARNING}[!] Skipped a song - {e}, {colours.ENDC}(use the command line to increase this).\n")
+                print(f"\n{colours.WARNING}[!] Skipped a song - The found song had less views than the minimum view count, {colours.ENDC}(use the cli to increase this).\n")
 
                 skipped_tracks.append((track, e))
 
@@ -182,13 +186,13 @@ class SpotifyDownloader():
 
             print(f"{colours.ENDC}   - Downloading, please wait{colours.ENDC}")
 
-            video_downloaded_path = self.youtube_client.download(youtube_link, self.audio_quality)
+            video_downloaded_path, self.audio_quality = self.youtube_client.download(youtube_link, self.audio_quality)
 
             # consider updating searchable name to something nicer for the end user
 
             print(f"{colours.ENDC}   - Converting the song and adding metadata{colours.ENDC}")
 
-            resave_audio_clip_with_metadata(video_downloaded_path, track.get_metadata(), track_path)
+            resave_audio_clip_with_metadata(video_downloaded_path, track.get_metadata(), output_path + track.get_title(True) + ".mp3", self.audio_quality)
 
             print(f"{colours.ENDC}   - Done!")
 
@@ -204,14 +208,14 @@ class SpotifyDownloader():
 
         except ConfigVideoMaxLength as e:
             if(not as_sub_function):
-                print(f"\n{colours.FAIL}Error: {colours.ENDC}The found song was longer than the configured max song length (use the command line to increase this) {colours.ENDC} (e: {e}).{colours.ENDC}\n")
+                print(f"\n{colours.FAIL}Error: {colours.ENDC}The found song was longer than the configured max song length (use the cli to increase this) {colours.ENDC} (e: {e}).{colours.ENDC}\n")
                 return False
             else:
                 raise e
 
         except ConfigVideoLowViewCount as e:
             if(not as_sub_function):
-                print(f"\n{colours.FAIL}Error: {colours.ENDC}The found song had less views than the minimum view count (use the command line to increase this){colours.ENDC} (e: {e}).{colours.ENDC}\n")
+                print(f"\n{colours.FAIL}Error: {colours.ENDC}The found song had less views than the minimum view count (use the cli to increase this){colours.ENDC} (e: {e}).{colours.ENDC}\n")
                 return False
             else:
                 raise e
