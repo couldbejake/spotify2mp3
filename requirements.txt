@@ -20,7 +20,7 @@ requests==2.27.1
 soupsieve==2.3.2.post1
 toml==0.10.2
 tqdm==4.64.0
-urllib3==1.26.9
+urllib3==1.26.17
 youtube-search==2.1.0
 lxml==4.8.0
 fuzzywuzzy==0.18.0
