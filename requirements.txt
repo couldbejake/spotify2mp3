@@ -16,7 +16,6 @@ packaging==21.3
 Pillow==9.1.1
 proglog==0.1.10
 pyparsing==3.0.9
-pytube==15.0.0
 requests==2.27.1
 soupsieve==2.3.2.post1
 toml==0.10.2
@@ -24,8 +23,8 @@ tqdm==4.64.0
 urllib3==1.26.9
 youtube-search==2.1.0
 lxml==4.8.0
-
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.12.2
 tekore==5.0.1
 flask==2.2.5
+git+https://github.com/abanand132/pytube.git@master#egg=pytube
