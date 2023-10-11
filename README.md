@@ -1,6 +1,5 @@
 <div align="center">
 
-  *Download bug fixed*: pytube has been updated in the requirements.txt file - You will need to reinstall packages from it.
 
   <img src="assets/logo.png" alt="logo" width="250" height="auto" />  
   <p>
