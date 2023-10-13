@@ -1,5 +1,5 @@
 <div align="center">
-
+  Fixes requirements.txt bug, and updated readme.
 
   <img src="assets/logo.png" alt="logo" width="250" height="auto" />  
   <p>
