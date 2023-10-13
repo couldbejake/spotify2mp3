@@ -52,7 +52,11 @@
 <!-- Prerequisites -->
 ### :bangbang: Prerequisites
 
-Ideally use **Python 3.11** but works down to Python 3.8
+1. Ideally use **Python 3.11** but works down to Python 3.8
+2. Install git.
+   Windows: https://git-scm.com/download/win
+   Ubuntu: It should come pre-installed
+   Mac OS: It should come pre-installed
 
 <!-- Run Locally -->
 ### :running: Run Locally
