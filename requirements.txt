@@ -27,5 +27,5 @@ fuzzywuzzy==0.18.0
 python-Levenshtein==0.12.2
 tekore==5.0.1
 flask==2.2.5
-Werkzeug==2.2.2
+Werkzeug==3.0.1
 git+https://github.com/abanand132/pytube.git@master#egg=pytube
