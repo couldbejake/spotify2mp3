@@ -1,4 +1,5 @@
-*Update: Fixed requirements.txt bug, and updated readme.*
+<b>Not being actively maintained</b>
+
 <div align="center">
 
   <img src="assets/logo.png" alt="logo" width="250" height="auto" />  
