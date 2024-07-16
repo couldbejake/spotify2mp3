@@ -29,3 +29,4 @@ tekore==5.0.1
 flask==2.2.5
 Werkzeug==2.2.2
 git+https://github.com/abanand132/pytube.git@master#egg=pytube
+setuptools>=70.0.0 # not directly required, pinned by Snyk to avoid a vulnerability
