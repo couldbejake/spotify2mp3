@@ -7,3 +7,11 @@ assets/.DS_Store
 */__pycache__
 __pycache__
 tekore_cfg.ini
+
+# Virtual environments
+venv/
+env/
+test_env/
+test_env_new/
+*.pyc
+.Python

@@ -1,31 +1,51 @@
-beautifulsoup4==4.11.1
-bs4==0.0.1
-certifi==2021.10.8
-charset-normalizer==2.0.12
-coverage==5.5
-decorator==4.4.2
-deprecation==2.1.0
-eyed3==0.9.6
-filetype==1.0.13
-idna==3.3
-imageio==2.19.2
-imageio-ffmpeg==0.4.7
-moviepy==1.0.3
-numpy==1.22.3
-packaging==21.3
-Pillow==9.1.1
-proglog==0.1.10
-pyparsing==3.0.9
-requests==2.27.1
-soupsieve==2.3.2.post1
-toml==0.10.2
-tqdm==4.64.0
-urllib3==1.26.17
-youtube-search==2.1.0
-lxml==4.8.0
-fuzzywuzzy==0.18.0
-python-Levenshtein==0.12.2
-tekore==5.0.1
-flask==2.2.5
-Werkzeug==2.2.2
-git+https://github.com/abanand132/pytube.git@master#egg=pytube
+# Web Scraping & Parsing
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+requests>=2.31.0
+
+# Audio/Video Processing
+eyed3>=0.9.7
+moviepy>=1.0.3
+imageio>=2.34.0
+imageio-ffmpeg>=0.5.1
+proglog>=0.1.10
+
+# Data Processing & Computation
+numpy>=1.24.0,<2.0.0
+Pillow>=10.0.0
+
+# String Matching
+fuzzywuzzy>=0.18.0
+Levenshtein>=0.25.0
+
+# Spotify API Client
+tekore>=5.6.0
+
+# Web Framework
+flask>=3.0.0
+Werkzeug>=3.0.0
+
+# YouTube
+pytube>=15.0.0
+youtube-search>=2.1.2
+
+# Utilities
+tqdm>=4.66.0
+filetype>=1.2.0
+toml>=0.10.2
+packaging>=23.0
+deprecation>=2.1.0
+decorator>=5.1.0
+
+# Network & Security
+urllib3>=2.0.0
+certifi>=2023.7.22
+charset-normalizer>=3.0.0
+idna>=3.4
+
+# Testing & Coverage (optional)
+coverage>=7.0.0
+
+# Additional Dependencies
+soupsieve>=2.5
+pyparsing>=3.1.0
