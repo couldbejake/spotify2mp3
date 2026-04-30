@@ -1,0 +1,12 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    uses: emmet02/.github/.github/workflows/release-please.yml@main
+    with:
+      release_type: python
+    secrets: inherit

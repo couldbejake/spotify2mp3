@@ -1,0 +1,11 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validation:
+    uses: emmet02/.github/.github/workflows/ci.yml@main
+    secrets: inherit
