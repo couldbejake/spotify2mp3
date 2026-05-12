@@ -21,7 +21,7 @@ auths = {}  # Auth attempts. Stores data across spotify login
 flask_process = None
 
 cfg_filename = 'tekore_cfg.ini'
-app_host = "localhost"
+app_host = "127.0.0.1"
 app_port = 5000
 app_url = f'http://{app_host}:{app_port}'
 login_redirect_url = f'{app_url}/callback'
@@ -120,10 +120,9 @@ def do_user_login():
     try:
         userToken = get_user_token()
         spotify = tk.Spotify(userToken)
-        topTracks = spotify.current_user_top_tracks()
+        user = spotify.current_user()
 
-        item = topTracks.items[0]
-        print(f'\n{colours.OKBLUE}It worked! {colours.ENDC}Your Top Track is: {item.name} by {item.artists[0].name}\n\n')
+        print(f'\n{colours.OKBLUE}It worked! {colours.ENDC}Logged in as: {user.display_name}\n\n')
     except tk.HTTPError as e:
         if is_client_configured():
             os.remove(cfg_filename)
