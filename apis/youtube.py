@@ -1,6 +1,6 @@
 from exceptions import ConfigVideoLowViewCount, ConfigVideoMaxLength, YoutubeItemNotFound
-from pytube import YouTube as pytubeYouTube
-from pytube import Playlist as pytubePlaylist
+from pytubefix import YouTube as pytubeYouTube
+from pytubefix import Playlist as pytubePlaylist
 from youtube_search import YoutubeSearch
 import json
 

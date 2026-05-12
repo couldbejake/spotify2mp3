@@ -1,5 +1,5 @@
 from const import colours
-from pytube.exceptions import AgeRestrictedError
+from pytubefix.exceptions import AgeRestrictedError
 from exceptions import SpotifyAlbumNotFound, SpotifyTrackNotFound, SpotifyPlaylistNotFound, ConfigVideoMaxLength, ConfigVideoLowViewCount, YoutubeItemNotFound
 from apis.spotify import Spotify
 from utils import resave_audio_clip_with_metadata
