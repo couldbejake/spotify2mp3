@@ -95,13 +95,16 @@ Brew yourself a coffee, you deserved it!
 
 To download user-specific content, you will need to set up a Spotify Developer App:
 
-1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/) and log in with your Spotify account.
+1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/) 
+   and log in with your Spotify account.
 2. Click **Create an App**. Give it a name and description.
 3. In the App settings, edit the **Redirect URIs**.
-4. Add the following Redirect URI EXACTLY as written: `http://127.0.0.1:5000/callback` (Do NOT use `localhost`).
+4. Add the following Redirect URI EXACTLY as written: 
+   `http://127.0.0.1:5000/callback` (Do NOT use `localhost`).
 5. Save the settings.
 6. Note down your **Client ID** and **Client Secret**.
-7. Run the script (e.g., `python spotify2mp3.py --liked`). When prompted, paste the Client ID and Client Secret into the terminal.
+7. Run the script (e.g., `python spotify2mp3.py --liked`). When prompted, 
+   paste the Client ID and Client Secret into the terminal.
 
 ## Getting spotify playlist URL
 
