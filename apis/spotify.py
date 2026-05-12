@@ -6,6 +6,14 @@ import sys
 import login
 
 import tekore as tk
+from typing import Optional
+
+# Monkey-patch tekore to make track popularity optional
+# Spotify API occasionally omits the popularity field, avoiding Pydantic validation errors
+tk.model.FullTrack.__annotations__['popularity'] = Optional[int]
+if hasattr(tk.model.FullTrack, 'model_fields'):  # Pydantic V2
+    tk.model.FullTrack.model_fields['popularity'].default = None
+    tk.model.FullTrack.model_rebuild(force=True)
 
 import const
 
